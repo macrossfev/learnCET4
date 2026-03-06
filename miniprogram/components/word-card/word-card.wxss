@@ -1,0 +1,100 @@
+/* 单词卡片 - 金属面板 */
+.word-card {
+  background: linear-gradient(180deg, #FFFFFF 0%, #F5F7FB 100%);
+  border-radius: 24rpx;
+  padding: 48rpx 36rpx;
+  box-shadow: 0 6rpx 24rpx rgba(30, 60, 110, 0.1), 0 2rpx 6rpx rgba(30, 60, 110, 0.06);
+  border: 1rpx solid rgba(180, 195, 220, 0.35);
+}
+
+.word-main {
+  text-align: center;
+  margin-bottom: 32rpx;
+}
+
+.word-text {
+  display: block;
+  font-size: 64rpx;
+  font-weight: 800;
+  color: #1a2a3a;
+  margin-bottom: 12rpx;
+}
+
+.word-phonetic {
+  display: block;
+  font-size: 30rpx;
+  color: #8494A7;
+}
+
+/* 播放按钮 - 钢蓝强调 */
+.play-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20rpx 0;
+  margin-bottom: 24rpx;
+}
+
+.play-icon {
+  width: 56rpx;
+  height: 56rpx;
+  margin-right: 12rpx;
+}
+
+.play-hint {
+  font-size: 26rpx;
+  color: #2B5EA7;
+  font-weight: 500;
+}
+
+/* 详情区 - 金属分割线 */
+.word-detail {
+  border-top: 1rpx solid rgba(180, 195, 220, 0.35);
+  padding-top: 28rpx;
+}
+
+.detail-row {
+  display: flex;
+  margin-bottom: 24rpx;
+}
+
+.detail-label {
+  font-size: 24rpx;
+  color: #8494A7;
+  width: 80rpx;
+  flex-shrink: 0;
+  padding-top: 4rpx;
+  font-weight: 500;
+}
+
+.detail-value-group {
+  flex: 1;
+}
+
+.detail-value {
+  font-size: 30rpx;
+  color: #1a2a3a;
+  display: block;
+  line-height: 1.6;
+}
+
+.detail-sub {
+  font-size: 26rpx;
+  color: #6B7B8D;
+  display: block;
+  margin-top: 4rpx;
+  line-height: 1.5;
+}
+
+/* 显示详情按钮 */
+.show-detail-btn {
+  text-align: center;
+  padding: 20rpx 0;
+  border-top: 1rpx solid rgba(180, 195, 220, 0.35);
+}
+
+.show-detail-btn text {
+  font-size: 28rpx;
+  color: #2B5EA7;
+  font-weight: 500;
+}

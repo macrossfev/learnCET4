@@ -1,0 +1,85 @@
+@import '/styles/common.wxss';
+
+.container {
+  padding: 30rpx;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, #E8EDF5 0%, #F0F2F7 40%, #F0F2F7 100%);
+}
+
+/* 进度头部 */
+.progress-header {
+  margin-bottom: 32rpx;
+}
+
+.progress-text {
+  display: block;
+  text-align: center;
+  font-size: 32rpx;
+  font-weight: 700;
+  background: linear-gradient(135deg, #2B5EA7, #3674B8);
+  -webkit-background-clip: text;
+  color: transparent;
+  margin-bottom: 16rpx;
+}
+
+/* 卡片区域 */
+.review-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.card-area {
+  flex: 1;
+  margin-bottom: 32rpx;
+}
+
+/* 底部按钮 */
+.action-buttons {
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 60rpx;
+  gap: 30rpx;
+}
+
+.action-btn {
+  flex: 1;
+}
+
+/* 完成页 */
+.complete-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 80vh;
+}
+
+.complete-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80rpx 48rpx;
+  width: 100%;
+}
+
+.complete-icon {
+  width: 160rpx;
+  height: 160rpx;
+  margin-bottom: 32rpx;
+}
+
+.complete-title {
+  font-size: 44rpx;
+  font-weight: 700;
+  color: #1a2a3a;
+  margin-bottom: 16rpx;
+}
+
+.complete-desc {
+  font-size: 28rpx;
+  color: #8494A7;
+  margin-bottom: 16rpx;
+}

@@ -1,0 +1,14 @@
+# 音频文件（已上传至云存储，可由脚本重新生成）
+audio/
+
+# Python 缓存
+__pycache__/
+*.pyc
+
+# 小程序编译产物
+miniprogram/miniprogram_npm/
+node_modules/
+
+# 系统文件
+.DS_Store
+Thumbs.db

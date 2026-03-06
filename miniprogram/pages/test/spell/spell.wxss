@@ -1,0 +1,270 @@
+@import '/styles/common.wxss';
+
+.container {
+  padding: 30rpx;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #E8EDF5 0%, #F0F2F7 40%, #F0F2F7 100%);
+}
+
+/* 进度头部 */
+.progress-header {
+  margin-bottom: 32rpx;
+}
+
+.progress-text {
+  display: block;
+  text-align: center;
+  font-size: 32rpx;
+  font-weight: 700;
+  background: linear-gradient(135deg, #2B5EA7, #3674B8);
+  -webkit-background-clip: text;
+  color: transparent;
+  margin-bottom: 16rpx;
+}
+
+/* 题目卡片 - 金属面板 */
+.question-card {
+  text-align: center;
+  padding: 48rpx 36rpx;
+  margin-bottom: 40rpx;
+}
+
+.question-meaning {
+  display: block;
+  font-size: 48rpx;
+  font-weight: 700;
+  color: #1a2a3a;
+  margin-bottom: 32rpx;
+  line-height: 1.5;
+}
+
+.play-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16rpx 0;
+}
+
+.play-icon {
+  width: 48rpx;
+  height: 48rpx;
+  margin-right: 12rpx;
+}
+
+.play-text {
+  font-size: 28rpx;
+  color: #2B5EA7;
+  font-weight: 500;
+}
+
+/* 提示区 */
+.hint-area {
+  text-align: center;
+  margin-bottom: 24rpx;
+}
+
+.hint-text {
+  font-size: 30rpx;
+  color: #D4860B;
+  font-weight: 500;
+}
+
+/* 输入区域 - 金属边框 */
+.input-area {
+  margin-bottom: 40rpx;
+}
+
+.spell-input {
+  background: linear-gradient(180deg, #FFFFFF, #FAFBFD);
+  border: 2rpx solid #B0C4DE;
+  border-radius: 16rpx;
+  padding: 28rpx 32rpx;
+  font-size: 36rpx;
+  text-align: center;
+  margin-bottom: 24rpx;
+  letter-spacing: 4rpx;
+  color: #1a2a3a;
+}
+
+.spell-input:focus {
+  border-color: #3674B8;
+  box-shadow: 0 0 0 4rpx rgba(54, 116, 184, 0.12);
+}
+
+.input-actions {
+  display: flex;
+  justify-content: center;
+  gap: 24rpx;
+}
+
+/* 结果区域 */
+.result-area {
+  margin-top: 20rpx;
+}
+
+.result-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24rpx;
+  border-radius: 16rpx;
+  margin-bottom: 32rpx;
+}
+
+.indicator-correct {
+  background: linear-gradient(180deg, #EDFAF0, #E0F5E4);
+  border: 1rpx solid rgba(26, 138, 92, 0.2);
+}
+
+.indicator-wrong {
+  background: linear-gradient(180deg, #FDF0F0, #FAE4E4);
+  border: 1rpx solid rgba(198, 40, 40, 0.2);
+}
+
+.indicator-icon {
+  font-size: 40rpx;
+  margin-right: 12rpx;
+}
+
+.indicator-correct .indicator-icon {
+  color: #1A8A5C;
+}
+
+.indicator-wrong .indicator-icon {
+  color: #C62828;
+}
+
+.indicator-text {
+  font-size: 32rpx;
+  font-weight: 600;
+}
+
+.indicator-correct .indicator-text {
+  color: #1A8A5C;
+}
+
+.indicator-wrong .indicator-text {
+  color: #C62828;
+}
+
+/* 用户答案 */
+.user-answer {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+  padding: 0 16rpx;
+}
+
+.answer-label {
+  font-size: 28rpx;
+  color: #8494A7;
+  margin-right: 16rpx;
+  flex-shrink: 0;
+}
+
+.answer-wrong {
+  font-size: 32rpx;
+  color: #C62828;
+  text-decoration: line-through;
+}
+
+/* 正确拼写展示 - 金属字符块 */
+.correct-spelling {
+  display: flex;
+  align-items: center;
+  margin-bottom: 40rpx;
+  padding: 0 16rpx;
+}
+
+.char-list {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.char-item {
+  font-size: 36rpx;
+  font-weight: 600;
+  font-family: 'Courier New', monospace;
+  width: 44rpx;
+  height: 52rpx;
+  line-height: 52rpx;
+  text-align: center;
+  margin: 4rpx;
+  border-radius: 8rpx;
+}
+
+.char-correct {
+  color: #1A8A5C;
+  background: linear-gradient(180deg, #EDFAF0, #E0F5E4);
+}
+
+.char-wrong {
+  color: #C62828;
+  background: linear-gradient(180deg, #FDF0F0, #FAE4E4);
+}
+
+/* 底部操作 */
+.bottom-action {
+  padding-top: 20rpx;
+  padding-bottom: 60rpx;
+}
+
+/* 结果页 */
+.result-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+}
+
+.result-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80rpx 48rpx;
+  width: 100%;
+}
+
+.result-title {
+  font-size: 44rpx;
+  font-weight: 700;
+  color: #1a2a3a;
+  margin-bottom: 48rpx;
+}
+
+.score-circle {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  margin-bottom: 20rpx;
+}
+
+.score-num {
+  font-size: 96rpx;
+  font-weight: 800;
+  background: linear-gradient(135deg, #2B5EA7, #3674B8, #5A9AD9);
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.score-total {
+  font-size: 40rpx;
+  color: #8494A7;
+  margin-left: 4rpx;
+}
+
+.score-percent {
+  font-size: 30rpx;
+  color: #4A5568;
+  margin-bottom: 60rpx;
+}
+
+.result-btns {
+  display: flex;
+  width: 100%;
+  gap: 24rpx;
+}
+
+.result-btn {
+  flex: 1;
+}

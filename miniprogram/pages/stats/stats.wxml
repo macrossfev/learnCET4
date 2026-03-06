@@ -1,0 +1,43 @@
+<view class="container" wx:if="{{!loading}}">
+  <!-- 数字统计卡片 2x2 网格 -->
+  <view class="card stats-grid">
+    <view class="stat-item">
+      <text class="stat-number">{{totalLearned}}</text>
+      <text class="stat-label">已学单词</text>
+    </view>
+    <view class="stat-item">
+      <text class="stat-number">{{streakDays}}</text>
+      <text class="stat-label">连续打卡(天)</text>
+    </view>
+    <view class="stat-item">
+      <text class="stat-number">{{todayLearned}}</text>
+      <text class="stat-label">今日已学</text>
+    </view>
+    <view class="stat-item">
+      <text class="stat-number">{{todayReview}}</text>
+      <text class="stat-label">今日待复习</text>
+    </view>
+  </view>
+
+  <!-- 测试正确率 -->
+  <view class="card accuracy-card">
+    <view class="flex-between">
+      <text class="accuracy-title">测试正确率</text>
+      <text class="accuracy-value">{{testAccuracy}}%</text>
+    </view>
+  </view>
+
+  <!-- 总进度条 -->
+  <view class="card progress-card">
+    <view class="progress-title flex-between">
+      <text>总进度</text>
+      <text class="muted-color text-small">{{totalLearned}} / {{totalWords}}</text>
+    </view>
+    <progress-bar percent="{{progressPercent}}" showLabel="{{true}}" label="已掌握" />
+  </view>
+</view>
+
+<!-- 加载中 -->
+<view class="container flex-center" wx:else>
+  <text class="muted-color">加载中...</text>
+</view>

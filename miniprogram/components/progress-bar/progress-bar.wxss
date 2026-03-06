@@ -1,0 +1,39 @@
+/* 进度条组件 - 钢蓝金属 */
+.progress-container {
+  width: 100%;
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12rpx;
+}
+
+.progress-text {
+  font-size: 26rpx;
+  color: #4A5568;
+}
+
+.progress-percent {
+  font-size: 26rpx;
+  font-weight: 600;
+  background: linear-gradient(135deg, #2B5EA7, #3674B8);
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.progress-track {
+  height: 16rpx;
+  background: linear-gradient(180deg, #E0E5EE, #D0D6E1);
+  border-radius: 8rpx;
+  overflow: hidden;
+  box-shadow: inset 0 1rpx 3rpx rgba(0, 0, 0, 0.08);
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3674B8, #5A9AD9, #3674B8);
+  border-radius: 8rpx;
+  transition: width 0.3s ease;
+  box-shadow: 0 1rpx 4rpx rgba(54, 116, 184, 0.4);
+}

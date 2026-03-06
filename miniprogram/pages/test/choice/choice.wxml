@@ -1,0 +1,58 @@
+<view class="container">
+  <!-- 结束页面 -->
+  <view class="result-wrap" wx:if="{{finished}}">
+    <view class="result-card card">
+      <text class="result-title">测试完成!</text>
+      <view class="score-circle">
+        <text class="score-num">{{score}}</text>
+        <text class="score-total">/{{questions.length}}</text>
+      </view>
+      <text class="score-percent">正确率 {{accuracy}}%</text>
+      <view class="result-btns">
+        <button class="btn btn-outline result-btn" bindtap="restartTest">再测一次</button>
+        <button class="btn btn-primary result-btn" bindtap="goBack">返回</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 答题页面 -->
+  <view class="quiz-content" wx:else>
+    <!-- 顶部进度 -->
+    <view class="progress-header">
+      <text class="progress-text">{{currentIndex + 1}}/{{questions.length}}</text>
+      <view class="progress-wrap">
+        <view class="progress-bar" style="width: {{(currentIndex + 1) / questions.length * 100}}%"></view>
+      </view>
+    </view>
+
+    <!-- 题目：英文单词 -->
+    <view class="question-card card" wx:if="{{questions.length > 0}}">
+      <text class="question-word">{{questions[currentIndex].word}}</text>
+      <text class="question-phonetic" wx:if="{{questions[currentIndex].phonetic}}">{{questions[currentIndex].phonetic}}</text>
+      <text class="question-hint">请选择正确的中文释义</text>
+    </view>
+
+    <!-- 选项 -->
+    <view class="options-list" wx:if="{{questions.length > 0}}">
+      <view
+        class="option-item card {{answered ? (index === questions[currentIndex].correctIndex ? 'option-correct' : (index === selectedOption ? 'option-wrong' : '')) : (index === selectedOption ? 'option-selected' : '')}}"
+        wx:for="{{questions[currentIndex].options}}"
+        wx:key="index"
+        data-index="{{index}}"
+        bindtap="selectOption"
+      >
+        <text class="option-label">{{['A','B','C','D'][index]}}</text>
+        <text class="option-text">{{item}}</text>
+        <text class="option-icon" wx:if="{{answered && index === questions[currentIndex].correctIndex}}">&#10004;</text>
+        <text class="option-icon wrong-icon" wx:if="{{answered && index === selectedOption && index !== questions[currentIndex].correctIndex}}">&#10008;</text>
+      </view>
+    </view>
+
+    <!-- 下一题按钮 -->
+    <view class="bottom-action" wx:if="{{answered}}">
+      <button class="btn btn-primary" bindtap="nextQuestion">
+        {{currentIndex + 1 >= questions.length ? '查看结果' : '下一题'}}
+      </button>
+    </view>
+  </view>
+</view>

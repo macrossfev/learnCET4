@@ -1,0 +1,192 @@
+@import '/styles/common.wxss';
+
+.container {
+  background: linear-gradient(180deg, #E8EDF5 0%, #F0F2F7 40%, #F0F2F7 100%);
+  min-height: 100vh;
+  padding-bottom: 120rpx;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: 200rpx;
+}
+
+.empty-icon {
+  font-size: 80rpx;
+  margin-bottom: 20rpx;
+}
+
+.empty-text {
+  font-size: 32rpx;
+  color: #4A5568;
+  margin-bottom: 12rpx;
+}
+
+.empty-sub {
+  font-size: 26rpx;
+  color: #8494A7;
+}
+
+/* 日期分组 - 金属面板 */
+.day-group {
+  margin-bottom: 20rpx;
+}
+
+.day-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(180deg, #FFFFFF, #F7F8FC);
+  padding: 24rpx 30rpx;
+  border-radius: 12rpx;
+  box-shadow: 0 2rpx 8rpx rgba(30, 60, 110, 0.06);
+  border: 1rpx solid rgba(180, 195, 220, 0.3);
+}
+
+.day-left {
+  display: flex;
+  align-items: center;
+}
+
+.day-date {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #1a2a3a;
+  margin-right: 16rpx;
+}
+
+.day-count {
+  font-size: 24rpx;
+  color: #C62828;
+  background: linear-gradient(180deg, #FDF0F0, #FAE4E4);
+  padding: 4rpx 14rpx;
+  border-radius: 20rpx;
+  border: 1rpx solid rgba(198, 40, 40, 0.15);
+}
+
+.day-arrow {
+  font-size: 28rpx;
+  color: #B0C4DE;
+}
+
+/* 错题条目 - 红色金属左边框 */
+.day-errors {
+  padding: 0 8rpx;
+}
+
+.error-item {
+  background: linear-gradient(180deg, #FFFFFF, #F7F8FC);
+  margin-top: 12rpx;
+  padding: 24rpx 28rpx;
+  border-radius: 12rpx;
+  border-left: 6rpx solid #C62828;
+  box-shadow: 0 2rpx 8rpx rgba(30, 60, 110, 0.05);
+  border-top: 1rpx solid rgba(180, 195, 220, 0.2);
+  border-right: 1rpx solid rgba(180, 195, 220, 0.2);
+  border-bottom: 1rpx solid rgba(180, 195, 220, 0.2);
+}
+
+.error-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8rpx;
+}
+
+.error-word {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #1a2a3a;
+}
+
+.error-type {
+  font-size: 22rpx;
+  padding: 4rpx 14rpx;
+  border-radius: 16rpx;
+  font-weight: 500;
+}
+
+.type-choice {
+  background: linear-gradient(135deg, rgba(54, 116, 184, 0.12), rgba(54, 116, 184, 0.06));
+  color: #2B5EA7;
+  border: 1rpx solid rgba(54, 116, 184, 0.2);
+}
+
+.type-spell {
+  background: linear-gradient(135deg, rgba(212, 134, 11, 0.12), rgba(212, 134, 11, 0.06));
+  color: #D4860B;
+  border: 1rpx solid rgba(212, 134, 11, 0.2);
+}
+
+.error-meaning {
+  display: block;
+  font-size: 26rpx;
+  color: #6B7B8D;
+  margin-bottom: 16rpx;
+}
+
+.error-answers {
+  background: linear-gradient(180deg, #F5F7FB, #EEF1F7);
+  border-radius: 8rpx;
+  padding: 16rpx 20rpx;
+  border: 1rpx solid rgba(180, 195, 220, 0.25);
+}
+
+.answer-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8rpx;
+}
+
+.answer-row:last-child {
+  margin-bottom: 0;
+}
+
+.answer-label {
+  font-size: 24rpx;
+  width: 120rpx;
+  flex-shrink: 0;
+}
+
+.wrong-label {
+  color: #C62828;
+}
+
+.correct-label {
+  color: #1A8A5C;
+}
+
+.answer-value {
+  font-size: 26rpx;
+  color: #1a2a3a;
+}
+
+.wrong-value {
+  text-decoration: line-through;
+  color: #C62828;
+}
+
+.correct-value {
+  color: #1A8A5C;
+  font-weight: 500;
+}
+
+/* 清空按钮 - 金属底栏 */
+.clear-section {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20rpx 30rpx;
+  padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, #F0F2F7, #E8EDF5);
+  border-top: 1rpx solid rgba(180, 195, 220, 0.3);
+}
+
+.clear-btn {
+  font-size: 28rpx;
+}

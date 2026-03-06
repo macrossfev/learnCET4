@@ -1,0 +1,74 @@
+<view class="container">
+  <!-- 学习设置分组 -->
+  <view class="section-title">学习设置</view>
+  <view class="card settings-group">
+    <!-- 每日学习量 -->
+    <picker mode="selector" range="{{dailyCountOptions}}" value="{{dailyCountIndex}}" bindchange="onDailyCountChange">
+      <view class="setting-item flex-between">
+        <text class="setting-label">每日学习量</text>
+        <view class="setting-value">
+          <text>{{dailyCountOptions[dailyCountIndex]}} 词</text>
+          <text class="arrow">></text>
+        </view>
+      </view>
+    </picker>
+
+    <view class="divider"></view>
+
+    <!-- 播放模式 -->
+    <picker mode="selector" range="{{playModeOptions}}" value="{{playModeIndex}}" bindchange="onPlayModeChange">
+      <view class="setting-item flex-between">
+        <text class="setting-label">播放模式</text>
+        <view class="setting-value">
+          <text>{{playModeOptions[playModeIndex]}}</text>
+          <text class="arrow">></text>
+        </view>
+      </view>
+    </picker>
+
+    <view class="divider"></view>
+
+    <!-- 发音速度 -->
+    <picker mode="selector" range="{{speedOptions}}" value="{{speedIndex}}" bindchange="onSpeedChange">
+      <view class="setting-item flex-between">
+        <text class="setting-label">发音速度</text>
+        <view class="setting-value">
+          <text>{{speedOptions[speedIndex]}}</text>
+          <text class="arrow">></text>
+        </view>
+      </view>
+    </picker>
+  </view>
+
+  <!-- 数据管理分组 -->
+  <view class="section-title">数据管理</view>
+  <view class="card settings-group">
+    <view class="setting-item flex-between">
+      <text class="setting-label">缓存大小</text>
+      <text class="setting-info">{{cacheSize}}</text>
+    </view>
+
+    <view class="divider"></view>
+
+    <view class="setting-item flex-between" bindtap="clearCache">
+      <text class="setting-label danger-color">清除本地缓存</text>
+      <text class="arrow">></text>
+    </view>
+  </view>
+
+  <!-- 关于 -->
+  <view class="section-title">关于</view>
+  <view class="card settings-group">
+    <view class="setting-item flex-between">
+      <text class="setting-label">版本号</text>
+      <text class="setting-info">v{{version}}</text>
+    </view>
+
+    <view class="divider"></view>
+
+    <view class="setting-item flex-between">
+      <text class="setting-label">词库</text>
+      <text class="setting-info">CET-4 核心词汇</text>
+    </view>
+  </view>
+</view>

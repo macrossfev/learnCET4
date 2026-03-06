@@ -1,0 +1,67 @@
+@import '/styles/common.wxss';
+
+.container {
+  background: linear-gradient(180deg, #E8EDF5 0%, #F0F2F7 40%, #F0F2F7 100%);
+}
+
+/* 统计网格 2x2 */
+.stats-grid {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.stat-item {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24rpx 0;
+  box-sizing: border-box;
+}
+
+.stat-number {
+  font-size: 56rpx;
+  font-weight: 800;
+  background: linear-gradient(135deg, #2B5EA7, #3674B8, #5A9AD9);
+  -webkit-background-clip: text;
+  color: transparent;
+  line-height: 1.2;
+}
+
+.stat-label {
+  font-size: 24rpx;
+  color: #8494A7;
+  margin-top: 8rpx;
+}
+
+/* 正确率卡片 */
+.accuracy-card {
+  padding: 30rpx;
+}
+
+.accuracy-title {
+  font-size: 30rpx;
+  color: #1a2a3a;
+  font-weight: 600;
+}
+
+.accuracy-value {
+  font-size: 40rpx;
+  font-weight: 800;
+  background: linear-gradient(135deg, #1A8A5C, #22A06B);
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+/* 进度卡片 */
+.progress-card {
+  padding: 30rpx;
+}
+
+.progress-title {
+  margin-bottom: 20rpx;
+  font-size: 30rpx;
+  color: #1a2a3a;
+  font-weight: 600;
+}

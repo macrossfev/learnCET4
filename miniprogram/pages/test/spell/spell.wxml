@@ -1,0 +1,93 @@
+<view class="container">
+  <!-- 结束页面 -->
+  <view class="result-wrap" wx:if="{{finished}}">
+    <view class="result-card card">
+      <text class="result-title">默写完成!</text>
+      <view class="score-circle">
+        <text class="score-num">{{score}}</text>
+        <text class="score-total">/{{words.length}}</text>
+      </view>
+      <text class="score-percent">正确率 {{accuracy}}%</text>
+      <view class="result-btns">
+        <button class="btn btn-outline result-btn" bindtap="restartTest">再测一次</button>
+        <button class="btn btn-primary result-btn" bindtap="goBack">返回</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 答题页面 -->
+  <view class="spell-content" wx:else>
+    <!-- 顶部进度 -->
+    <view class="progress-header">
+      <text class="progress-text">{{currentIndex + 1}}/{{words.length}}</text>
+      <view class="progress-wrap">
+        <view class="progress-bar" style="width: {{(currentIndex + 1) / words.length * 100}}%"></view>
+      </view>
+    </view>
+
+    <!-- 题目：中文释义 -->
+    <view class="question-card card" wx:if="{{words.length > 0}}">
+      <text class="question-meaning">{{words[currentIndex].meaning}}</text>
+      <view class="play-btn" bindtap="playWord">
+        <image class="play-icon" src="/images/icon_play.png" mode="aspectFit" />
+        <text class="play-text">播放发音</text>
+      </view>
+    </view>
+
+    <!-- 提示 -->
+    <view class="hint-area" wx:if="{{hintShown}}">
+      <text class="hint-text">提示：{{hintText}}</text>
+    </view>
+
+    <!-- 输入区域 -->
+    <view class="input-area" wx:if="{{!answered}}">
+      <input
+        class="spell-input"
+        placeholder="请输入英文单词"
+        value="{{inputValue}}"
+        bindinput="onInputChange"
+        bindconfirm="checkSpelling"
+        focus="{{!answered}}"
+        adjust-position="{{true}}"
+      />
+      <view class="input-actions">
+        <button class="btn btn-gray btn-small" bindtap="showHint" wx:if="{{!hintShown}}">提示</button>
+        <button class="btn btn-primary btn-small" bindtap="checkSpelling">确认</button>
+      </view>
+    </view>
+
+    <!-- 答题结果 -->
+    <view class="result-area" wx:if="{{answered}}">
+      <!-- 正确/错误标识 -->
+      <view class="result-indicator {{isCorrect ? 'indicator-correct' : 'indicator-wrong'}}">
+        <text class="indicator-icon">{{isCorrect ? '&#10004;' : '&#10008;'}}</text>
+        <text class="indicator-text">{{isCorrect ? '回答正确!' : '回答错误'}}</text>
+      </view>
+
+      <!-- 用户输入 -->
+      <view class="user-answer" wx:if="{{!isCorrect}}">
+        <text class="answer-label">你的答案：</text>
+        <text class="answer-wrong">{{inputValue}}</text>
+      </view>
+
+      <!-- 正确拼写（逐字符标记） -->
+      <view class="correct-spelling" wx:if="{{!isCorrect}}">
+        <text class="answer-label">正确拼写：</text>
+        <view class="char-list">
+          <text
+            class="char-item {{item.isCorrect ? 'char-correct' : 'char-wrong'}}"
+            wx:for="{{diffChars}}"
+            wx:key="index"
+          >{{item.char}}</text>
+        </view>
+      </view>
+
+      <!-- 下一题按钮 -->
+      <view class="bottom-action">
+        <button class="btn btn-primary" bindtap="nextQuestion">
+          {{currentIndex + 1 >= words.length ? '查看结果' : '下一题'}}
+        </button>
+      </view>
+    </view>
+  </view>
+</view>

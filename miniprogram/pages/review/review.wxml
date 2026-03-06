@@ -1,0 +1,34 @@
+<view class="container">
+  <!-- 完成提示 -->
+  <view class="complete-wrap" wx:if="{{completed}}">
+    <view class="complete-card card">
+      <image class="complete-icon" src="/images/icon_complete.png" mode="aspectFit" />
+      <text class="complete-title">复习完成!</text>
+      <text class="complete-desc" wx:if="{{words.length > 0}}">你已复习完今天的 {{words.length}} 个单词</text>
+      <text class="complete-desc" wx:else>今天没有需要复习的单词</text>
+      <button class="btn btn-primary mt-lg" bindtap="goBack">返回首页</button>
+    </view>
+  </view>
+
+  <!-- 复习卡片 -->
+  <view class="review-content" wx:else>
+    <!-- 顶部进度 -->
+    <view class="progress-header">
+      <text class="progress-text">{{currentIndex + 1}}/{{words.length}}</text>
+      <view class="progress-wrap">
+        <view class="progress-bar" style="width: {{(currentIndex + 1) / words.length * 100}}%"></view>
+      </view>
+    </view>
+
+    <!-- 单词卡片 -->
+    <view class="card-area">
+      <word-card word="{{words[currentIndex]}}" autoShowDetail="{{true}}" />
+    </view>
+
+    <!-- 底部按钮 -->
+    <view class="action-buttons">
+      <button class="btn btn-danger action-btn" bindtap="onForgot">忘了</button>
+      <button class="btn btn-success action-btn" bindtap="onRemembered">记住了</button>
+    </view>
+  </view>
+</view>

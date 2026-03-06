@@ -1,0 +1,48 @@
+<view class="container">
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{errorDays.length === 0}}">
+    <text class="empty-icon">&#9997;</text>
+    <text class="empty-text">暂无错题记录</text>
+    <text class="empty-sub">答错的单词会自动记录在这里</text>
+  </view>
+
+  <!-- 错题列表 -->
+  <view class="error-list" wx:else>
+    <view class="day-group" wx:for="{{errorDays}}" wx:key="date">
+      <view class="day-header" bind:tap="toggleDate" data-date="{{item.date}}">
+        <view class="day-left">
+          <text class="day-date">{{item.date}}</text>
+          <text class="day-count">{{item.count}} 题</text>
+        </view>
+        <text class="day-arrow">{{expandedDate === item.date ? '▾' : '▸'}}</text>
+      </view>
+
+      <view class="day-errors" wx:if="{{expandedDate === item.date}}">
+        <view class="error-item" wx:for="{{item.errors}}" wx:for-item="err" wx:key="timestamp">
+          <view class="error-top">
+            <text class="error-word">{{err.word}}</text>
+            <text class="error-type {{err.type === 'choice' ? 'type-choice' : 'type-spell'}}">
+              {{err.type === 'choice' ? '选择' : '默写'}}
+            </text>
+          </view>
+          <text class="error-meaning">{{err.meaning}}</text>
+          <view class="error-answers">
+            <view class="answer-row">
+              <text class="answer-label wrong-label">你的答案</text>
+              <text class="answer-value wrong-value">{{err.userAnswer || '(空)'}}</text>
+            </view>
+            <view class="answer-row">
+              <text class="answer-label correct-label">正确答案</text>
+              <text class="answer-value correct-value">{{err.correctAnswer}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 清空按钮 -->
+  <view class="clear-section" wx:if="{{errorDays.length > 0}}">
+    <button class="btn btn-gray clear-btn" bind:tap="clearAll">清空错题本</button>
+  </view>
+</view>

@@ -1,0 +1,11 @@
+page {
+  background-color: #F0F2F7;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 28rpx;
+  color: #1a2a3a;
+  box-sizing: border-box;
+}
+
+view, text, image {
+  box-sizing: border-box;
+}

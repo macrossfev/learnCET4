@@ -1,0 +1,48 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/learn/learn",
+    "pages/review/review",
+    "pages/test/choice/choice",
+    "pages/test/spell/spell",
+    "pages/stats/stats",
+    "pages/settings/settings",
+    "pages/errors/errors"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#1E4D8C",
+    "navigationBarTitleText": "LearnE",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#F0F2F7",
+    "backgroundTextStyle": "dark"
+  },
+  "tabBar": {
+    "color": "#8494A7",
+    "selectedColor": "#2B5EA7",
+    "backgroundColor": "#FAFBFD",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "images/tab_home.png",
+        "selectedIconPath": "images/tab_home_active.png"
+      },
+      {
+        "pagePath": "pages/stats/stats",
+        "text": "统计",
+        "iconPath": "images/tab_stats.png",
+        "selectedIconPath": "images/tab_stats_active.png"
+      },
+      {
+        "pagePath": "pages/settings/settings",
+        "text": "设置",
+        "iconPath": "images/tab_settings.png",
+        "selectedIconPath": "images/tab_settings_active.png"
+      }
+    ]
+  },
+  "cloud": true,
+  "sitemapLocation": "sitemap.json",
+  "style": "v2"
+}

@@ -1,0 +1,6 @@
+{
+  "usingComponents": {
+    "word-card": "/components/word-card/word-card"
+  },
+  "navigationBarTitleText": "复习"
+}

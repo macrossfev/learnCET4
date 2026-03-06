@@ -1,0 +1,80 @@
+<view class="container">
+  <!-- 顶部欢迎区域 -->
+  <view class="welcome-section">
+    <text class="welcome-title">LearnE</text>
+    <text class="welcome-sub">每天进步一点点</text>
+  </view>
+
+  <!-- 今日任务标题 -->
+  <view class="section-header">
+    <text class="section-title">今日任务</text>
+    <view class="streak-badge" wx:if="{{streakDays > 0}}">
+      <text class="streak-text">连续打卡 {{streakDays}} 天</text>
+    </view>
+  </view>
+
+  <!-- 学习卡片 -->
+  <view class="task-card learn-card" bind:tap="goLearn">
+    <view class="task-info">
+      <text class="task-label">学习新词</text>
+      <view class="task-numbers">
+        <text class="task-done">{{todayLearned}}</text>
+        <text class="task-sep">/</text>
+        <text class="task-total">{{dailyCount}}</text>
+      </view>
+      <text class="task-hint" wx:if="{{todayRemain > 0}}">还需学习 {{todayRemain}} 个单词</text>
+      <text class="task-hint task-complete" wx:else>今日学习已完成</text>
+    </view>
+    <view class="task-action">
+      <button class="btn btn-primary btn-small" bind:tap="goLearn">开始学习</button>
+    </view>
+  </view>
+
+  <!-- 复习卡片 -->
+  <view class="task-card review-card" bind:tap="goReview">
+    <view class="task-info">
+      <text class="task-label">复习巩固</text>
+      <view class="task-numbers">
+        <text class="task-done review-count">{{reviewCount}}</text>
+        <text class="task-unit">词待复习</text>
+      </view>
+      <text class="task-hint" wx:if="{{reviewCount > 0}}">有 {{reviewCount}} 个单词需要复习</text>
+      <text class="task-hint" wx:else>暂无待复习单词</text>
+    </view>
+    <view class="task-action">
+      <button class="btn btn-outline btn-small" bind:tap="goReview">
+        开始复习
+        <view class="badge" wx:if="{{reviewCount > 0}}">{{reviewCount}}</view>
+      </button>
+    </view>
+  </view>
+
+  <!-- 错题本入口 -->
+  <view class="task-card error-card" bind:tap="goErrors">
+    <view class="task-info">
+      <text class="task-label">错题本</text>
+      <text class="task-hint">查看每日答错的单词记录</text>
+    </view>
+    <view class="task-action">
+      <button class="btn btn-outline btn-small" bind:tap="goErrors">查看错题</button>
+    </view>
+  </view>
+
+  <!-- 总进度 -->
+  <view class="progress-section">
+    <view class="section-header">
+      <text class="section-title">总体进度</text>
+      <text class="progress-num">{{totalLearned}} / {{1000}}</text>
+    </view>
+    <progress-bar percent="{{totalPercent}}" label="已掌握" showLabel="{{true}}" />
+  </view>
+
+  <!-- 打卡天数底部 -->
+  <view class="streak-section" wx:if="{{streakDays > 0}}">
+    <view class="streak-icon-wrap">
+      <text class="streak-number">{{streakDays}}</text>
+      <text class="streak-label">天</text>
+    </view>
+    <text class="streak-desc">连续学习</text>
+  </view>
+</view>

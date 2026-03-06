@@ -1,0 +1,36 @@
+<view class="word-card">
+  <view class="word-main">
+    <text class="word-text">{{word.word}}</text>
+    <text class="word-phonetic">{{word.phonetic}}</text>
+  </view>
+
+  <view class="play-btn" bind:tap="onPlayTap">
+    <image class="play-icon" src="{{isPlaying ? '/images/icon_pause.png' : '/images/icon_play.png'}}" mode="aspectFit" />
+    <text class="play-hint">{{playingLabel || '播放'}}</text>
+  </view>
+
+  <view class="word-detail" wx:if="{{showDetail}}">
+    <view class="detail-row">
+      <text class="detail-label">释义</text>
+      <text class="detail-value">{{word.meaning}}</text>
+    </view>
+    <view class="detail-row">
+      <text class="detail-label">词组</text>
+      <view class="detail-value-group">
+        <text class="detail-value">{{word.phrase}}</text>
+        <text class="detail-sub">{{word.phrase_meaning}}</text>
+      </view>
+    </view>
+    <view class="detail-row">
+      <text class="detail-label">例句</text>
+      <view class="detail-value-group">
+        <text class="detail-value">{{word.example}}</text>
+        <text class="detail-sub">{{word.example_meaning}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="show-detail-btn" bind:tap="toggleDetail" wx:if="{{!showDetail}}">
+    <text>显示详情</text>
+  </view>
+</view>
