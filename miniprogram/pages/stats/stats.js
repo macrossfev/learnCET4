@@ -19,7 +19,13 @@ Page({
     estimatedDays: 0,
     dailyAverage: 0,
     badges: [],
-    weeklyTrend: []
+    weeklyTrend: [],
+    // 复习统计
+    reviewStats: {
+      totalReviews: 0,
+      masteryRate: 0,
+      difficultWords: []
+    }
   },
 
   _loadStartTime: 0,
@@ -60,6 +66,9 @@ Page({
       // 计算学习趋势和徽章
       const weeklyTrend = this._calculateWeeklyTrend(dailyAverage)
       const badges = this._calculateBadges(totalLearned, stats.streak_days || 0, accuracy)
+      
+      // 计算复习统计
+      const reviewStats = this._calculateReviewStats(progress.review_queue || [])
 
       this.setData({
         totalLearned,
@@ -73,6 +82,7 @@ Page({
         dailyCount,
         badges,
         weeklyTrend,
+        reviewStats,
         loading: false
       })
       
@@ -80,6 +90,34 @@ Page({
     } catch (err) {
       console.error('加载统计失败', err)
       this.setData({ loading: false })
+    }
+  },
+
+  _calculateReviewStats(reviewQueue) {
+    // 计算总复习次数
+    const totalReviews = reviewQueue.reduce((sum, item) => {
+      return sum + (item.stage || 0)
+    }, 0)
+    
+    // 计算掌握率（stage >= 3 为掌握）
+    const masteredCount = reviewQueue.filter(item => (item.stage || 0) >= 3).length
+    const masteryRate = reviewQueue.length > 0 
+      ? safePercent(masteredCount, reviewQueue.length) 
+      : 0
+    
+    // 找出高频遗忘单词（stage = 0 且 review_dates 长度>3）
+    const difficultWords = reviewQueue
+      .filter(item => (item.stage || 0) === 0 && (item.review_dates || []).length > 3)
+      .slice(0, 5)
+      .map(item => ({
+        word: item.word,
+        forgottenCount: (item.review_dates || []).length
+      }))
+
+    return {
+      totalReviews,
+      masteryRate,
+      difficultWords
     }
   },
 

@@ -69,6 +69,32 @@
       </view>
     </view>
   </view>
+
+  <!-- 复习统计 -->
+  <view class="card review-stats-card" wx:if="{{reviewStats.totalReviews > 0 || reviewStats.difficultWords.length > 0}}">
+    <view class="card-title">📊 复习统计</view>
+    
+    <view class="stats-row" wx:if="{{reviewStats.totalReviews > 0}}">
+      <view class="stat-box">
+        <text class="stat-value">{{reviewStats.totalReviews}}</text>
+        <text class="stat-label">累计复习</text>
+      </view>
+      <view class="stat-box">
+        <text class="stat-value {{reviewStats.masteryRate >= 80 ? 'high' : 'medium'}}">{{reviewStats.masteryRate}}%</text>
+        <text class="stat-label">掌握率</text>
+      </view>
+    </view>
+    
+    <view class="difficult-section" wx:if="{{reviewStats.difficultWords.length > 0}}">
+      <text class="difficult-title">⚠️ 高频遗忘单词</text>
+      <view class="difficult-list">
+        <view class="difficult-item" wx:for="{{reviewStats.difficultWords}}" wx:key="word">
+          <text class="difficult-word">{{item.word}}</text>
+          <text class="difficult-count">遗忘 {{item.forgottenCount}} 次</text>
+        </view>
+      </view>
+    </view>
+  </view>
 </view>
 
 <!-- 加载中 -->

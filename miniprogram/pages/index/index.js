@@ -84,8 +84,9 @@ Page({
   },
 
   goReview() {
+    // 跳转到复习模式选择页
     wx.navigateTo({
-      url: '/pages/review/review'
+      url: '/pages/review-mode/review-mode'
     })
   },
 

@@ -1,0 +1,44 @@
+<view class="container">
+  <!-- 顶部统计 -->
+  <view class="header-section">
+    <text class="header-title">选择复习模式</text>
+    <view class="review-count" wx:if="{{reviewCount > 0}}">
+      <text class="count-number">{{reviewCount}}</text>
+      <text class="count-label">个单词待复习</text>
+    </view>
+    <view class="no-review" wx:else>
+      <text class="no-review-text">🎉 暂无待复习单词</text>
+    </view>
+  </view>
+
+  <!-- 模式列表 -->
+  <view class="mode-list">
+    <view
+      class="mode-item {{item.recommended ? 'recommended' : ''}} {{item.color}}"
+      wx:for="{{modes}}"
+      wx:key="id"
+      data-id="{{item.id}}"
+      bind:tap="onSelectMode"
+    >
+      <view class="mode-header">
+        <text class="mode-icon">{{item.icon}}</text>
+        <view class="mode-badge" wx:if="{{item.recommended}}">
+          <text class="badge-text">推荐</text>
+        </view>
+      </view>
+      
+      <text class="mode-title">{{item.title}}</text>
+      <text class="mode-desc">{{item.desc}}</text>
+      
+      <view class="mode-footer">
+        <text class="mode-time">⏱ {{item.time}}</text>
+        <text class="mode-arrow">›</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部提示 -->
+  <view class="footer-tip">
+    <text class="tip-text">💡 建议每天使用标准模式复习，考前使用重点复习</text>
+  </view>
+</view>

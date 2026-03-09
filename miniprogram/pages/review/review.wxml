@@ -4,22 +4,51 @@
     <view class="complete-card card">
       <view class="complete-icon">🎉</view>
       <text class="complete-title">复习完成!</text>
-      <view class="complete-stats">
-        <view class="stat-item">
-          <text class="stat-number">{{words.length}}</text>
-          <text class="stat-label">本次复习</text>
+      
+      <!-- 详细报告 -->
+      <view class="review-report">
+        <view class="report-header">
+          <text class="report-title">本次复习报告</text>
+          <text class="report-date">{{reviewDate}}</text>
         </view>
-        <view class="stat-item">
-          <text class="stat-number success">{{rememberedCount}}</text>
-          <text class="stat-label">已掌握</text>
+        
+        <view class="report-stats">
+          <view class="report-item">
+            <text class="item-number">{{words.length}}</text>
+            <text class="item-label">复习总数</text>
+          </view>
+          <view class="report-item success">
+            <text class="item-number">{{rememberedCount}}</text>
+            <text class="item-label">😍 熟悉</text>
+          </view>
+          <view class="report-item warning">
+            <text class="item-number">{{unsureCount}}</text>
+            <text class="item-label">🙂 模糊</text>
+          </view>
+          <view class="report-item error">
+            <text class="item-number">{{forgotCount}}</text>
+            <text class="item-label">😕 遗忘</text>
+          </view>
         </view>
-        <view class="stat-item">
-          <text class="stat-number warn">{{forgotCount}}</text>
-          <text class="stat-label">需再复习</text>
+        
+        <!-- 掌握率 -->
+        <view class="mastery-rate" wx:if="{{words.length > 0}}">
+          <view class="rate-header">
+            <text class="rate-label">掌握率</text>
+            <text class="rate-value">{{_calculateMasteryRate()}}%</text>
+          </view>
+          <view class="rate-bar">
+            <view class="rate-fill" style="width: {{_calculateMasteryRate()}}%"></view>
+          </view>
+        </view>
+        
+        <!-- 建议 -->
+        <view class="review-suggestion">
+          <text class="suggestion-icon">💡</text>
+          <text class="suggestion-text">{{_getSuggestion()}}</text>
         </view>
       </view>
-      <text class="complete-desc" wx:if="{{rememberedCount > 0}}">太棒了！{{rememberedCount}} 个单词已掌握</text>
-      <text class="complete-desc" wx:if="{{forgotCount > 0}}">加油！{{forgotCount}} 个单词需要再次复习</text>
+      
       <button class="btn btn-primary mt-lg" bindtap="goBack">返回首页</button>
     </view>
   </view>
@@ -28,7 +57,10 @@
   <view class="review-content" wx:else>
     <!-- 顶部进度 -->
     <view class="progress-header">
-      <text class="progress-text">{{currentIndex + 1}}/{{words.length}}</text>
+      <view class="progress-info">
+        <text class="progress-text">{{currentIndex + 1}}/{{words.length}}</text>
+        <text class="mode-tag" wx:if="{{reviewMode === 'quick'}}">快速模式</text>
+      </view>
       <view class="progress-wrap">
         <view class="progress-bar" style="width: {{(currentIndex + 1) / words.length * 100}}%"></view>
       </view>
@@ -36,20 +68,88 @@
 
     <!-- 单词卡片 -->
     <view class="card-area">
-      <word-card word="{{words[currentIndex]}}" autoShowDetail="{{true}}" />
-    </view>
+      <view class="review-card">
+        <!-- 单词部分（始终显示） -->
+        <view class="word-section">
+          <text class="word-text">{{words[currentIndex].word}}</text>
+          <text class="phonetic-text">{{words[currentIndex].phonetic}}</text>
+          
+          <!-- 播放按钮 -->
+          <view class="audio-btn-wrap">
+            <button class="audio-btn" bindtap="onPlayWord" hover-class="audio-btn-hover">
+              <text>🔊</text>
+            </button>
+          </view>
+        </view>
 
-    <!-- 即时反馈动画 -->
-    <view class="feedback-overlay" wx:if="{{showFeedback}}">
-      <view class="feedback-bubble {{feedbackType}}">
-        <text class="feedback-text">{{feedbackText}}</text>
+        <!-- 释义部分（点击后显示） -->
+        <view class="meaning-section {{showMeaning ? 'show' : 'hide'}}" bindtap="onShowMeaning">
+          <view class="meaning-mask" wx:if="{{!showMeaning}}">
+            <text class="mask-icon">👁</text>
+            <text class="mask-text">点击查看释义</text>
+          </view>
+          
+          <view class="meaning-content" wx:if="{{showMeaning}}">
+            <view class="meaning-item">
+              <text class="meaning-label">释义：</text>
+              <text class="meaning-text">{{words[currentIndex].meaning}}</text>
+            </view>
+            <view class="meaning-item" wx:if="{{words[currentIndex].phrase}}">
+              <text class="meaning-label">词组：</text>
+              <text class="meaning-text">{{words[currentIndex].phrase}}</text>
+              <text class="meaning-text muted">{{words[currentIndex].phrase_meaning}}</text>
+            </view>
+            <view class="meaning-item" wx:if="{{words[currentIndex].example}}">
+              <text class="meaning-label">例句：</text>
+              <text class="meaning-text">{{words[currentIndex].example}}</text>
+              <text class="meaning-text muted">{{words[currentIndex].example_meaning}}</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 掌握程度选择（显示释义后出现） -->
+        <view class="mastery-section" wx:if="{{showMeaning && masteryLevel === 0}}">
+          <text class="mastery-prompt">请选择掌握程度：</text>
+          <view class="mastery-buttons">
+            <button class="mastery-btn mastery-success" data-level="1" bindtap="onMasterySelect">
+              <text class="mastery-icon">😍</text>
+              <text class="mastery-label">熟悉</text>
+            </button>
+            <button class="mastery-btn mastery-warning" data-level="2" bindtap="onMasterySelect">
+              <text class="mastery-icon">🙂</text>
+              <text class="mastery-label">模糊</text>
+            </button>
+            <button class="mastery-btn mastery-error" data-level="3" bindtap="onMasterySelect">
+              <text class="mastery-icon">😕</text>
+              <text class="mastery-label">遗忘</text>
+            </button>
+          </view>
+        </view>
+
+        <!-- 已选择掌握程度 -->
+        <view class="mastery-selected" wx:if="{{masteryLevel > 0}}">
+          <text class="mastery-selected-icon">{{masteryLevel === 1 ? '😍' : (masteryLevel === 2 ? '🙂' : '😕')}}</text>
+          <text class="mastery-selected-text">{{masteryLevel === 1 ? '熟悉' : (masteryLevel === 2 ? '模糊' : '遗忘')}}</text>
+        </view>
       </view>
     </view>
 
-    <!-- 底部按钮 -->
+    <!-- 底部操作按钮 -->
     <view class="action-buttons">
-      <button class="btn btn-danger action-btn" bindtap="onForgot">忘了</button>
-      <button class="btn btn-success action-btn" bindtap="onRemembered">记住了</button>
+      <button class="btn btn-gray action-btn" bindtap="onResetWord" wx:if="{{showMeaning || masteryLevel > 0}}">
+        重置
+      </button>
+      <button class="btn btn-gray action-btn" bindtap="onSkip">
+        跳过
+      </button>
+    </view>
+
+    <!-- 反馈动画 -->
+    <view class="feedback-overlay" wx:if="{{showFeedback}}">
+      <view class="feedback-bubble {{feedbackColor}}">
+        <text class="feedback-icon">{{feedbackIcon}}</text>
+        <text class="feedback-text">{{feedbackText}}</text>
+      </view>
     </view>
   </view>
 </view>

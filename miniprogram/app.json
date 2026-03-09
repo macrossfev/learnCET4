@@ -4,6 +4,7 @@
     "pages/index/index",
     "pages/learn/learn",
     "pages/review/review",
+    "pages/review-mode/review-mode",
     "pages/test/choice/choice",
     "pages/test/spell/spell",
     "pages/stats/stats",
