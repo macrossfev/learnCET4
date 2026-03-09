@@ -102,7 +102,7 @@
 
   <!-- 完成状态 -->
   <view class="done-state" wx:if="{{allDone}}">
-    <text class="done-icon-text">&#10003;</text>
+    <text class="done-icon-text">✅</text>
     <text class="done-title">学习完成</text>
     <text class="done-sub">本单元已全部掌握</text>
   </view>
