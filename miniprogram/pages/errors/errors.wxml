@@ -1,7 +1,7 @@
 <view class="container">
   <!-- 空状态 -->
   <view class="empty-state" wx:if="{{errorDays.length === 0}}">
-    <text class="empty-icon">&#9997;</text>
+    <text class="empty-icon">📝</text>
     <text class="empty-text">暂无错题记录</text>
     <text class="empty-sub">答错的单词会自动记录在这里</text>
   </view>
