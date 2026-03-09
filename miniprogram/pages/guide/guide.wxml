@@ -1,13 +1,30 @@
 <view class="guide-container">
   <!-- 跳过按钮 -->
-  <view class="skip-btn" bindtap="onSkip" hover-class="skip-btn-hover">跳过</view>
+  <view class="skip-btn" bindtap="onSkip">跳过</view>
 
   <!-- 引导内容 -->
   <view class="guide-content">
-    <view class="guide-icon">{{steps[currentStep].icon}}</view>
-    <view class="guide-title">{{steps[currentStep].title}}</view>
-    <view class="guide-subtitle">{{steps[currentStep].subtitle}}</view>
-    <view class="guide-desc">{{steps[currentStep].desc}}</view>
+    <!-- 普通引导屏 -->
+    <block wx:if="{{!steps[currentStep].isDemo}}">
+      <view class="guide-icon">{{steps[currentStep].icon}}</view>
+      <view class="guide-title">{{steps[currentStep].title}}</view>
+      <view class="guide-subtitle">{{steps[currentStep].subtitle}}</view>
+      <view class="guide-desc">{{steps[currentStep].desc}}</view>
+    </block>
+    
+    <!-- 实操演示屏 -->
+    <block wx:else>
+      <view class="demo-card">
+        <view class="demo-word">{{demoWord.word}}</view>
+        <view class="demo-phonetic">{{demoWord.phonetic}}</view>
+        <view class="demo-meaning">{{demoWord.meaning}}</view>
+        <view class="demo-play-btn" bindtap="onPlayDemo">
+          <text class="play-icon">🔊</text>
+          <text class="play-text">点击播放发音</text>
+        </view>
+      </view>
+      <view class="demo-hint">👆 试试点击播放按钮</view>
+    </block>
   </view>
 
   <!-- 指示点 -->

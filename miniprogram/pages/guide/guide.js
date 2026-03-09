@@ -27,8 +27,22 @@ Page({
         subtitle: '科学记忆',
         desc: '1 天→3 天→7 天→14 天→30 天，对抗遗忘曲线',
         dotIndex: 2
+      },
+      {
+        icon: '👆',
+        title: '点击播放',
+        subtitle: '听音学词',
+        desc: '点击喇叭图标播放发音，跟读加深记忆',
+        dotIndex: 3,
+        isDemo: true
       }
-    ]
+    ],
+    // 实操演示数据
+    demoWord: {
+      word: 'abandon',
+      phonetic: '/əˈbændən/',
+      meaning: '放弃'
+    }
   },
 
   onNext() {
@@ -61,6 +75,15 @@ Page({
       fail: (err) => {
         if (config.debug) console.error('switchTab fail:', err)
       }
+    })
+  },
+
+  // 播放演示音频
+  onPlayDemo() {
+    wx.showToast({
+      title: '🔊 播放发音',
+      icon: 'none',
+      duration: 1500
     })
   }
 })

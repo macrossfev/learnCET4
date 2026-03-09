@@ -26,6 +26,16 @@ Page({
   _touchStartY: 0,
   _autoSaveTimer: null,
   _loadStartTime: 0,
+  
+  // 鼓励语录
+  _encouragements: [
+    '没关系，下次一定行！💪',
+    '这个确实容易错，加油！👍',
+    '记住正确答案了就学会了！📚',
+    '错误是学习的机会！🌟',
+    '又学会一个词，进步了！🎉',
+    '坚持就是胜利！🏆'
+  ],
 
   onLoad(options) {
     this._loadStartTime = Date.now()
@@ -96,7 +106,14 @@ Page({
     try {
       wx.showLoading({ title: '加载中...' })
       const settings = getApp().globalData.settings
-      const dailyCount = settings.dailyCount
+      let dailyCount = settings.dailyCount
+      
+      // 首个单元减半，降低初学者压力
+      const isFirstUnit = unit === 1
+      if (isFirstUnit) {
+        dailyCount = 10
+      }
+      
       const { startRank, endRank } = review.getUnitRange(unit, dailyCount)
 
       const level = 'CET4'
@@ -271,11 +288,24 @@ Page({
     if (!correct) {
       const currentWord = this.data.words[this.data.currentIndex]
       this._saveError(currentWord, 'choice', option.meaning, currentWord.meaning)
+      // 显示鼓励语
+      this._showEncouragement()
     }
 
     setTimeout(() => {
       this.setData({ phase: 'spell' })
     }, 1200)
+  },
+  
+  // 显示鼓励语
+  _showEncouragement() {
+    const index = Math.floor(Math.random() * this._encouragements.length)
+    const text = this._encouragements[index]
+    wx.showToast({
+      title: text,
+      icon: 'none',
+      duration: 2000
+    })
   },
 
   onSpellInput(e) {
