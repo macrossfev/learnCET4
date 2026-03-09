@@ -8,6 +8,44 @@
 
   <!-- 错题列表 -->
   <view class="error-list" wx:else>
+    <!-- 智能统计卡片 -->
+    <view class="stats-card">
+      <view class="stats-title">📊 错题统计</view>
+      <view class="stats-grid">
+        <view class="stat-box">
+          <text class="stat-value">{{errorStats.total}}</text>
+          <text class="stat-label">总错题</text>
+        </view>
+        <view class="stat-box">
+          <text class="stat-value">{{errorStats.choice}}</text>
+          <text class="stat-label">选择错误</text>
+        </view>
+        <view class="stat-box">
+          <text class="stat-value">{{errorStats.spell}}</text>
+          <text class="stat-label">拼写错误</text>
+        </view>
+        <view class="stat-box">
+          <text class="stat-value">{{errorStats.recent}}</text>
+          <text class="stat-label">今日新增</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 推荐练习 -->
+    <view class="recommend-section" wx:if="{{recommendedWords.length > 0}}">
+      <view class="section-header">
+        <text class="section-title">💡 推荐练习</text>
+        <text class="section-desc">错误次数最多的单词</text>
+      </view>
+      <view class="recommend-list">
+        <view class="recommend-item" wx:for="{{recommendedWords}}" wx:key="word">
+          <text class="recommend-word">{{item.word}}</text>
+          <text class="recommend-count">错误 {{item.count}} 次</text>
+        </view>
+      </view>
+      <button class="btn btn-primary recommend-btn" bind:tap="testAllErrors">📝 测试推荐单词</button>
+    </view>
+
     <!-- 全部测试按钮 -->
     <view class="test-all-section">
       <button class="btn btn-primary test-all-btn" bind:tap="testAllErrors">

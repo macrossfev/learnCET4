@@ -6,6 +6,117 @@
   padding-bottom: 120rpx;
 }
 
+/* 智能统计卡片 */
+.stats-card {
+  background: linear-gradient(180deg, #FFFFFF 0%, #F7F8FC 100%);
+  border-radius: 20rpx;
+  padding: 28rpx;
+  margin: 20rpx 30rpx;
+  box-shadow: 0 4rpx 16rpx rgba(30, 60, 110, 0.08);
+  border: 1rpx solid rgba(180, 195, 220, 0.35);
+}
+
+.stats-title {
+  display: block;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #1a2a3a;
+  margin-bottom: 20rpx;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12rpx;
+}
+
+.stat-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16rpx 8rpx;
+  background: linear-gradient(180deg, #F8F9FC, #F0F2F7);
+  border-radius: 12rpx;
+}
+
+.stat-value {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #2B5EA7;
+  margin-bottom: 6rpx;
+}
+
+.stat-label {
+  font-size: 20rpx;
+  color: #8494A7;
+  text-align: center;
+}
+
+/* 推荐练习区域 */
+.recommend-section {
+  background: linear-gradient(180deg, #FFF8E1, #FFECB3);
+  border-radius: 20rpx;
+  padding: 28rpx;
+  margin: 20rpx 30rpx;
+  border: 1rpx solid rgba(255, 193, 7, 0.3);
+}
+
+.section-header {
+  margin-bottom: 20rpx;
+}
+
+.section-title {
+  display: block;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #1a2a3a;
+  margin-bottom: 8rpx;
+}
+
+.section-desc {
+  display: block;
+  font-size: 24rpx;
+  color: #B08D55;
+}
+
+.recommend-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-bottom: 20rpx;
+}
+
+.recommend-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12rpx 20rpx;
+  background: #fff;
+  border-radius: 24rpx;
+  border: 1rpx solid rgba(212, 134, 11, 0.2);
+  min-width: 200rpx;
+}
+
+.recommend-word {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1a2a3a;
+  margin-right: 12rpx;
+}
+
+.recommend-count {
+  font-size: 22rpx;
+  color: #D4860B;
+}
+
+.recommend-btn {
+  width: 100%;
+  height: 80rpx;
+  border-radius: 40rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+}
+
 /* 空状态 */
 .empty-state {
   display: flex;

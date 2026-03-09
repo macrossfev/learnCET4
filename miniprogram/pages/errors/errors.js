@@ -1,15 +1,27 @@
 const db = require('../../utils/db')
+const constants = require('../../utils/constants')
 
 Page({
   data: {
     errorDays: [],
     expandedDate: '',
     masteringWord: null,
-    showTestOptions: false
+    showTestOptions: false,
+    // 智能分类
+    errorStats: {
+      total: 0,
+      choice: 0,
+      spell: 0,
+      recent: 0
+    },
+    // 推荐练习
+    recommendedWords: []
   },
 
   onShow() {
     this.loadErrors()
+    this._calculateStats()
+    this._generateRecommendations()
   },
 
   loadErrors() {
@@ -41,6 +53,49 @@ Page({
     }).filter(day => day.count > 0)
 
     this.setData({ errorDays: days })
+  },
+
+  _calculateStats() {
+    const errorBook = wx.getStorageSync('error_book') || {}
+    let total = 0, choice = 0, spell = 0, recent = 0
+    const today = new Date().toISOString().split('T')[0]
+    
+    Object.keys(errorBook).forEach(date => {
+      errorBook[date].forEach(err => {
+        if (!err.mastered) {
+          total++
+          if (err.type === 'choice') choice++
+          if (err.type === 'spell') spell++
+          if (date === today) recent++
+        }
+      })
+    })
+    
+    this.setData({
+      errorStats: { total, choice, spell, recent }
+    })
+  },
+
+  _generateRecommendations() {
+    const errorBook = wx.getStorageSync('error_book') || {}
+    const wordFreq = {}
+    
+    // 统计每个单词的错误次数
+    Object.keys(errorBook).forEach(date => {
+      errorBook[date].forEach(err => {
+        if (!err.mastered) {
+          wordFreq[err.word] = (wordFreq[err.word] || 0) + 1
+        }
+      })
+    })
+    
+    // 按错误次数排序，取前 10 个
+    const recommended = Object.entries(wordFreq)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .map(([word, count]) => ({ word, count }))
+    
+    this.setData({ recommendedWords: recommended })
   },
 
   toggleDate(e) {
