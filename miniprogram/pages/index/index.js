@@ -93,5 +93,11 @@ Page({
     wx.navigateTo({
       url: '/pages/errors/errors'
     })
+  },
+
+  goShare() {
+    wx.navigateTo({
+      url: '/pages/share/share'
+    })
   }
 })

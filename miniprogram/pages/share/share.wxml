@@ -1,0 +1,52 @@
+<view class="share-container">
+  <!-- Share Card -->
+  <view class="share-card" wx:if="{{posterReady}}">
+    <view class="card-header">
+      <text class="app-name">📚 四级必过</text>
+      <text class="app-slogan">每天进步一点点</text>
+    </view>
+
+    <view class="card-stats">
+      <view class="stat-row">
+        <text class="stat-icon">🔥</text>
+        <text class="stat-label">连续打卡</text>
+        <text class="stat-value">{{streakDays}} 天</text>
+      </view>
+      <view class="stat-row">
+        <text class="stat-icon">📖</text>
+        <text class="stat-label">已掌握</text>
+        <text class="stat-value">{{totalLearned}} 词</text>
+      </view>
+      <view class="stat-row">
+        <text class="stat-icon">✅</text>
+        <text class="stat-label">今日学习</text>
+        <text class="stat-value">{{todayLearned}} 词</text>
+      </view>
+    </view>
+
+    <view class="card-footer">
+      <text class="date">{{shareDate}}</text>
+      <text class="encourage">一起加油，一次过四级！💪</text>
+    </view>
+
+    <!-- QR Code placeholder -->
+    <view class="qr-section">
+      <view class="qr-placeholder">
+        <text class="qr-hint">小程序码</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Action Buttons -->
+  <view class="action-buttons">
+    <button class="action-btn" bind:tap="onShareToMoments">
+      分享到朋友圈
+    </button>
+    <button class="action-btn secondary" bind:tap="copyShareText">
+      复制文案
+    </button>
+    <button class="action-btn secondary" bind:tap="shareImage">
+      截图分享
+    </button>
+  </view>
+</view>

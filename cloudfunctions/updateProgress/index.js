@@ -4,7 +4,26 @@ const db = cloud.database()
 const _ = db.command
 
 exports.main = async (event, context) => {
+  const wxContext = cloud.getWXContext()
+  const { OPENID } = wxContext
+  
+  // 验证用户身份
+  if (!OPENID) {
+    return { success: false, error: '未授权访问' }
+  }
+  
   const { progressId, learned_words, review_queue, total_learned, test_correct_inc, test_total_inc, daily_count, current_unit, stats } = event
+
+  // 验证数据所有权
+  if (progressId) {
+    const progressRes = await db.collection('user_progress')
+      .where({ _id: progressId, _openid: OPENID })
+      .get()
+    
+    if (progressRes.data.length === 0) {
+      return { success: false, error: '无权访问此数据' }
+    }
+  }
 
   const updateData = {}
 

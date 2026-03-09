@@ -60,6 +60,17 @@
     </view>
   </view>
 
+  <!-- 分享打卡卡片（今日学习完成后显示） -->
+  <view class="task-card share-card" wx:if="{{todayLearned >= dailyCount}}" bind:tap="goShare">
+    <view class="task-info">
+      <text class="task-label">🎉 今日学习完成</text>
+      <text class="task-hint">分享你的学习成就，邀请好友一起打卡</text>
+    </view>
+    <view class="task-action">
+      <button class="btn btn-share btn-small" bind:tap="goShare">分享打卡</button>
+    </view>
+  </view>
+
   <!-- 总进度 -->
   <view class="progress-section">
     <view class="section-header">

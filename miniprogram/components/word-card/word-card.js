@@ -1,6 +1,9 @@
 const audio = require('../../utils/audio')
 
 Component({
+  options: {
+    multipleSlots: true
+  },
   properties: {
     word: { type: Object, value: {} },
     autoShowDetail: { type: Boolean, value: true }

@@ -3,6 +3,14 @@ cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
 
 exports.main = async (event, context) => {
+  const wxContext = cloud.getWXContext()
+  const { OPENID } = wxContext
+  
+  // 验证用户身份
+  if (!OPENID) {
+    return { words: [], error: '未授权访问' }
+  }
+  
   const { level, skip, limit, startRank, endRank } = event
   const _ = db.command
 

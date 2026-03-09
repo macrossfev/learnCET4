@@ -200,3 +200,27 @@
   color: #8494A7;
   margin-top: 4rpx;
 }
+
+/* 分享打卡卡片 */
+.share-card {
+  background: linear-gradient(135deg, #FFF8E1 0%, #FFECB3 100%);
+  border-color: rgba(255, 193, 7, 0.4);
+}
+
+.share-card .task-label {
+  color: #D4860B;
+}
+
+.share-card .task-hint {
+  color: #B08D55;
+}
+
+.btn-share {
+  background: linear-gradient(135deg, #D4860B, #C67D00);
+  color: #fff;
+  box-shadow: 0 4rpx 12rpx rgba(212, 134, 11, 0.3);
+}
+
+.btn-share::after {
+  border: none;
+}

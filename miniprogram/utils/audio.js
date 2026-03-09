@@ -1,3 +1,9 @@
+/**
+ * 音频播放管理模块
+ */
+const config = require('../config')
+const constants = require('./constants')
+
 let innerAudioCtx = null
 let currentPlaylist = []
 let currentIndex = 0
@@ -5,7 +11,11 @@ let isPlaying = false
 let onSequenceComplete = null
 let onItemPlay = null
 let playSession = 0
+let audioRetryCount = 0
 
+/**
+ * 创建音频上下文
+ */
 function createCtx() {
   if (innerAudioCtx) {
     innerAudioCtx.offEnded()
@@ -13,43 +23,74 @@ function createCtx() {
     innerAudioCtx.destroy()
     innerAudioCtx = null
   }
+  
   innerAudioCtx = wx.createInnerAudioContext()
-  innerAudioCtx.autoplay = true
+  innerAudioCtx.autoplay = false
   const session = playSession
+  
   innerAudioCtx.onEnded(() => {
     if (session !== playSession) return
+    audioRetryCount = 0
     currentIndex++
     playNext()
   })
+  
   innerAudioCtx.onError((err) => {
     if (session !== playSession) return
+    
+    // 重试机制
+    if (audioRetryCount < constants.AUDIO_MAX_RETRY) {
+      audioRetryCount++
+      console.log(`音频播放失败，重试 ${audioRetryCount}/${constants.AUDIO_MAX_RETRY}`)
+      setTimeout(() => {
+        innerAudioCtx.play()
+      }, 500 * audioRetryCount)
+      return
+    }
+    
+    // 超过重试次数，跳过
     console.error('音频播放失败', err)
+    audioRetryCount = 0
     currentIndex++
     playNext()
   })
+  
   return innerAudioCtx
 }
 
+/**
+ * 播放下一首
+ */
 function playNext() {
   if (currentIndex >= currentPlaylist.length) {
     isPlaying = false
     if (onSequenceComplete) onSequenceComplete()
     return
   }
+  
   const ctx = innerAudioCtx
   if (!ctx) return
+  
   const item = currentPlaylist[currentIndex]
   if (onItemPlay) onItemPlay(currentIndex, item)
+  
   ctx.playbackRate = getApp().globalData.settings.playSpeed || 1.0
+  
+  // 显式设置 src 并播放，避免重复播放
   ctx.src = item.url
+  ctx.play()
 }
 
-// 播放单词的完整音频序列
-// audioObj: { word, meaning, phrase, phrase_meaning, example, example_meaning }
+/**
+ * 播放单词的完整音频序列
+ * @param {Object} audioObj - 音频对象 { word, meaning, phrase, phrase_meaning, example, example_meaning }
+ * @param {Object} callbacks - 回调函数 { onComplete, onItemPlay }
+ */
 function playWordSequence(audioObj, callbacks = {}) {
   stop()
   onSequenceComplete = callbacks.onComplete || null
   onItemPlay = callbacks.onItemPlay || null
+  audioRetryCount = 0
 
   currentPlaylist = [
     { url: audioObj.word, key: 'word' },
@@ -66,11 +107,17 @@ function playWordSequence(audioObj, callbacks = {}) {
   playNext()
 }
 
-// 播放单个音频
+/**
+ * 播放单个音频
+ * @param {string} url - 音频 URL
+ * @param {Function} callback - 播放完成回调
+ */
 function playSingle(url, callback) {
   stop()
   onSequenceComplete = callback || null
   onItemPlay = null
+  audioRetryCount = 0
+  
   currentPlaylist = [{ url, key: 'single' }]
   currentIndex = 0
   isPlaying = true
@@ -78,6 +125,9 @@ function playSingle(url, callback) {
   playNext()
 }
 
+/**
+ * 停止播放
+ */
 function stop() {
   playSession++
   isPlaying = false
@@ -85,11 +135,16 @@ function stop() {
   currentPlaylist = []
   onSequenceComplete = null
   onItemPlay = null
+  audioRetryCount = 0
+  
   if (innerAudioCtx) {
     innerAudioCtx.stop()
   }
 }
 
+/**
+ * 暂停播放
+ */
 function pause() {
   if (innerAudioCtx && isPlaying) {
     innerAudioCtx.pause()
@@ -97,6 +152,9 @@ function pause() {
   }
 }
 
+/**
+ * 恢复播放
+ */
 function resume() {
   if (innerAudioCtx && !isPlaying && currentPlaylist.length > 0) {
     innerAudioCtx.play()
@@ -104,10 +162,16 @@ function resume() {
   }
 }
 
+/**
+ * 获取播放状态
+ */
 function getIsPlaying() {
   return isPlaying
 }
 
+/**
+ * 销毁音频上下文
+ */
 function destroy() {
   stop()
   if (innerAudioCtx) {
@@ -118,7 +182,11 @@ function destroy() {
   }
 }
 
-// 预加载单元音频（后台下载缓存）
+/**
+ * 预加载单元音频
+ * @param {Array} words - 单词列表
+ * @returns {Promise<Array>} 预加载结果
+ */
 async function preloadUnitAudio(words) {
   const tasks = []
   for (const word of words) {
@@ -128,9 +196,7 @@ async function preloadUnitAudio(words) {
       if (url && url.startsWith('cloud://')) {
         tasks.push(
           wx.cloud.downloadFile({ fileID: url })
-            .then(res => {
-              return { fileID: url, tempFilePath: res.tempFilePath }
-            })
+            .then(res => ({ fileID: url, tempFilePath: res.tempFilePath }))
             .catch(() => null)
         )
       }

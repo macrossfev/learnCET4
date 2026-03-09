@@ -1,6 +1,7 @@
 const db = require('../../utils/db')
 const audio = require('../../utils/audio')
 const review = require('../../utils/review')
+const constants = require('../../utils/constants')
 
 Page({
   data: {
@@ -11,32 +12,87 @@ Page({
     unit: 1,
     isContinuousMode: false,
     allDone: false,
-    // Quiz state
-    phase: 'learn', // learn | choice | spell | result
+    phase: 'learn',
     choiceOptions: [],
     choiceSelected: -1,
     choiceCorrect: false,
     spellInput: '',
     spellCorrect: false,
-    quizPassed: false
+    quizPassed: false,
+    showQuizNotice: false
   },
 
   _touchStartX: 0,
   _touchStartY: 0,
+  _autoSaveTimer: null,
+  _loadStartTime: 0,
 
   onLoad(options) {
+    this._loadStartTime = Date.now()
     const unit = parseInt(options.unit) || 1
     const settings = getApp().globalData.settings
     const isContinuousMode = settings.playMode === 'continuous'
     this.setData({ unit, isContinuousMode })
-    this.loadWords(unit)
+    this._checkInterruptedProgress()
+    this._startAutoSave()
+  },
+
+  _checkInterruptedProgress() {
+    const tempProgress = wx.getStorageSync('temp_learning_progress')
+    if (tempProgress && tempProgress.unit === this.data.unit) {
+      const now = Date.now()
+      const diff = now - tempProgress.timestamp
+      
+      if (diff < constants.RECOVER_TIMEOUT && tempProgress.currentIndex > 0) {
+        wx.showModal({
+          title: '恢复学习',
+          content: `检测到未完成的学习，是否从第 ${tempProgress.currentIndex + 1} 词继续？`,
+          success: (res) => {
+            if (res.confirm) {
+              this.setData({ currentIndex: tempProgress.currentIndex, phase: 'learn' })
+              this.loadWords(this.data.unit, true)
+            } else {
+              this.loadWords(this.data.unit, false)
+            }
+          }
+        })
+        return
+      }
+    }
+    this.loadWords(this.data.unit, false)
+  },
+
+  _startAutoSave() {
+    this._autoSaveTimer = setInterval(() => {
+      this._saveProgress()
+    }, constants.AUTO_SAVE_INTERVAL)
+  },
+
+  _recordLoadTime() {
+    const loadTime = Date.now() - this._loadStartTime
+    if (loadTime > 3000) {
+      console.warn('页面加载过慢:', loadTime, 'ms')
+    }
   },
 
   onUnload() {
     audio.stop()
+    this._clearAutoSave()
+    this._recordLoadTime()
   },
 
-  async loadWords(unit) {
+  onHide() {
+    this._saveProgress()
+  },
+
+  _clearAutoSave() {
+    if (this._autoSaveTimer) {
+      clearInterval(this._autoSaveTimer)
+      this._autoSaveTimer = null
+    }
+  },
+
+  async loadWords(unit, skipRestore = false) {
     try {
       wx.showLoading({ title: '加载中...' })
       const settings = getApp().globalData.settings
@@ -70,9 +126,12 @@ Page({
         return
       }
 
+      // If restoring, use saved index, otherwise start from 0
+      const startIndex = skipRestore ? this.data.currentIndex : 0
+      
       this.setData({
         words: unlearnedWords,
-        currentIndex: 0,
+        currentIndex: startIndex,
         progress,
         todayLearned: [],
         allDone: false,
@@ -84,6 +143,18 @@ Page({
       console.error('加载单词失败', err)
       wx.showToast({ title: '加载失败', icon: 'none' })
     }
+  },
+
+  // Save progress for interruption recovery
+  _saveProgress() {
+    const { unit, currentIndex, todayLearned } = this.data
+    const tempProgress = {
+      unit,
+      currentIndex,
+      todayLearnedCount: todayLearned.length,
+      timestamp: Date.now()
+    }
+    wx.setStorageSync('temp_learning_progress', tempProgress)
   },
 
   // Swipe handlers
@@ -123,8 +194,32 @@ Page({
     this.setData({ currentIndex: currentIndex + 1, phase: 'learn' })
   },
 
+  // Show quiz notice modal
+  showQuizNotice() {
+    this.setData({ showQuizNotice: true })
+  },
+
+  hideQuizNotice() {
+    this.setData({ showQuizNotice: false })
+  },
+
+  // Skip quiz and mark for review
+  skipQuiz() {
+    this.hideQuizNotice()
+    wx.showToast({ title: '已加入复习', icon: 'none' })
+    // Move to next word or finish
+    const { currentIndex, words } = this.data
+    if (currentIndex >= words.length - 1) {
+      this.onAllDone()
+    } else {
+      audio.stop()
+      this.setData({ currentIndex: currentIndex + 1, phase: 'learn' })
+    }
+  },
+
   // Start quiz for current word
   startQuiz() {
+    this.hideQuizNotice()
     audio.stop()
     const { words, currentIndex } = this.data
     const currentWord = words[currentIndex]
@@ -247,6 +342,9 @@ Page({
         progress: newProgress,
         todayLearned: newTodayLearned
       })
+      
+      // Save progress for interruption recovery
+      this._saveProgress()
     } catch (err) {
       console.error('标记失败', err)
     }
@@ -265,12 +363,24 @@ Page({
     }
   },
 
-  // 连续播放模式下自动进入测试
+  // 连续播放模式下自动播放下一个单词
   onSequenceComplete() {
     if (!this.data.isContinuousMode) return
-    setTimeout(() => {
-      this.startQuiz()
-    }, 600)
+    const { currentIndex, words } = this.data
+    if (currentIndex >= words.length - 1) {
+      // 最后一个单词，完成学习
+      this.onAllDone()
+    } else {
+      // 播放下一个单词
+      setTimeout(() => {
+        this.setData({ currentIndex: currentIndex + 1, phase: 'learn' })
+        // 自动播放下一个单词的音频
+        const wordCard = this.selectComponent('word-card')
+        if (wordCard) {
+          wordCard.playSequence()
+        }
+      }, 800)
+    }
   },
 
   async onAllDone() {

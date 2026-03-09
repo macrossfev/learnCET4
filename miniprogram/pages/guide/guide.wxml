@@ -1,0 +1,24 @@
+<view class="guide-container">
+  <!-- 跳过按钮 -->
+  <view class="skip-btn" bindtap="onSkip" hover-class="skip-btn-hover">跳过</view>
+
+  <!-- 引导内容 -->
+  <view class="guide-content">
+    <view class="guide-icon">{{steps[currentStep].icon}}</view>
+    <view class="guide-title">{{steps[currentStep].title}}</view>
+    <view class="guide-subtitle">{{steps[currentStep].subtitle}}</view>
+    <view class="guide-desc">{{steps[currentStep].desc}}</view>
+  </view>
+
+  <!-- 指示点 -->
+  <view class="dots">
+    <view class="dot {{index === currentStep ? 'active' : ''}}" wx:for="{{steps}}" wx:for-index="index" wx:key="*this"></view>
+  </view>
+
+  <!-- 底部按钮 -->
+  <view class="bottom-btns">
+    <button class="guide-btn" bindtap="onNext" hover-class="guide-btn-hover" hover-stop-propagation="true">
+      {{currentStep === steps.length - 1 ? '开始学习' : '继续'}}
+    </button>
+  </view>
+</view>

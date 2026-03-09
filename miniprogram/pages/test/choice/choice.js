@@ -1,4 +1,10 @@
+/**
+ * 选择测试页面
+ */
 const db = require('../../../utils/db')
+const { handleError } = require('../../../utils/error')
+const { shuffle, getRandomItems, safePercent } = require('../../../utils/common')
+const constants = require('../../../utils/constants')
 
 Page({
   data: {
@@ -9,11 +15,17 @@ Page({
     score: 0,
     finished: false,
     accuracy: 0,
-    progressId: ''
+    progressId: '',
+    isErrorMode: false
   },
 
+  _loadStartTime: 0,
+
   onLoad(options) {
+    this._loadStartTime = Date.now()
     this.unitFromUrl = options.unit ? parseInt(options.unit) : null
+    this.isErrorMode = options.errorMode === 'true'
+    this.errorWords = options.words ? options.words.split(',') : []
     this.loadQuestions()
   },
 
@@ -22,7 +34,33 @@ Page({
     try {
       const app = getApp()
       const level = app.globalData.settings.level || 'CET4'
-      const dailyCount = app.globalData.settings.dailyCount || 20
+      const dailyCount = app.globalData.settings.dailyCount || constants.DEFAULT_DAILY_COUNT
+      
+      this.setData({ isErrorMode: this.isErrorMode })
+
+      if (this.isErrorMode) {
+        if (!this.errorWords || this.errorWords.length === 0) {
+          wx.hideLoading()
+          wx.showToast({ title: '暂无错题', icon: 'none' })
+          return
+        }
+        const result = await db.getWordsByRange(level, 1, 3393)
+        const allWords = result.words || []
+        const words = allWords.filter(w => this.errorWords.includes(w.word))
+        
+        if (words.length === 0) {
+          wx.hideLoading()
+          wx.showToast({ title: '单词不存在', icon: 'none' })
+          return
+        }
+        
+        const questions = this.generateQuestions(words)
+        this.setData({ questions })
+        wx.hideLoading()
+        this._recordLoadTime()
+        return
+      }
+
       const progress = await db.getUserProgress(level)
 
       if (!progress || !progress.learned_words || progress.learned_words.length === 0) {
@@ -33,7 +71,6 @@ Page({
 
       this.setData({ progressId: progress._id })
 
-      // 优先使用URL传入的unit，否则取当前单元的前一个（刚学完的）
       const currentUnit = this.unitFromUrl || progress.current_unit || 1
       const startRank = (currentUnit - 1) * dailyCount + 1
       const endRank = currentUnit * dailyCount
@@ -48,20 +85,25 @@ Page({
 
       const questions = this.generateQuestions(words)
       this.setData({ questions })
-    } catch (err) {
-      console.error('加载测试题目失败', err)
-      wx.showToast({ title: '加载失败', icon: 'none' })
-    } finally {
       wx.hideLoading()
+      this._recordLoadTime()
+    } catch (err) {
+      handleError(err, '加载失败')
+    }
+  },
+
+  _recordLoadTime() {
+    const loadTime = Date.now() - this._loadStartTime
+    if (loadTime > 3000) {
+      console.warn('页面加载过慢:', loadTime, 'ms')
     }
   },
 
   generateQuestions(words) {
-    const questions = words.map((word, index) => {
-      // 从其他单词中随机选3个作为干扰项
-      const otherWords = words.filter((_, i) => i !== index)
-      const distractors = this.getRandomItems(otherWords, 3).map(w => w.meaning)
-      const options = this.shuffle([word.meaning, ...distractors])
+    const questions = words.map((word) => {
+      const otherWords = words.filter((w) => w.word !== word.word)
+      const distractors = getRandomItems(otherWords, constants.CHOICE_DISTRACTOR_COUNT).map(w => w.meaning)
+      const options = shuffle([word.meaning, ...distractors])
       const correctIndex = options.indexOf(word.meaning)
 
       return {
@@ -73,21 +115,7 @@ Page({
       }
     })
 
-    return this.shuffle(questions)
-  },
-
-  getRandomItems(arr, count) {
-    const shuffled = [...arr].sort(() => Math.random() - 0.5)
-    return shuffled.slice(0, Math.min(count, shuffled.length))
-  },
-
-  shuffle(arr) {
-    const result = [...arr]
-    for (let i = result.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [result[i], result[j]] = [result[j], result[i]]
-    }
-    return result
+    return shuffle(questions)
   },
 
   selectOption(e) {
@@ -110,7 +138,7 @@ Page({
     const nextIndex = currentIndex + 1
 
     if (nextIndex >= questions.length) {
-      const accuracy = questions.length > 0 ? Math.round(this.data.score / questions.length * 100) : 0
+      const accuracy = safePercent(this.data.score, questions.length)
       this.setData({ finished: true, accuracy })
       this.saveScore()
     } else {
@@ -128,7 +156,7 @@ Page({
     try {
       await db.updateTestScore(progressId, score, questions.length)
     } catch (err) {
-      console.error('保存测试成绩失败', err)
+      handleError(err, '保存成绩失败', { showToast: false })
     }
   },
 

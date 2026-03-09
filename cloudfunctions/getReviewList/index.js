@@ -5,13 +5,19 @@ const _ = db.command
 
 exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext()
-  const openid = wxContext.OPENID
+  const { OPENID } = wxContext
+  
+  // 验证用户身份
+  if (!OPENID) {
+    return { words: [], reviewItems: [], count: 0, error: '未授权访问' }
+  }
+  
   const level = event.level || 'CET4'
   const today = new Date().toISOString().split('T')[0]
 
   // 获取用户进度
   const progressRes = await db.collection('user_progress')
-    .where({ _openid: openid, level })
+    .where({ _openid: OPENID, level })
     .get()
 
   if (progressRes.data.length === 0) {
@@ -29,7 +35,7 @@ exports.main = async (event, context) => {
 
   // 获取待复习单词的完整数据
   const wordNames = reviewItems.map(item => item.word)
-  // 云数据库 in 查询最多支持一次查20条，需分批
+  // 云数据库 in 查询最多支持一次查 20 条，需分批
   const batchSize = 20
   let allWords = []
   for (let i = 0; i < wordNames.length; i += batchSize) {

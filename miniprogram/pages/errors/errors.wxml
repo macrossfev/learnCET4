@@ -8,33 +8,51 @@
 
   <!-- 错题列表 -->
   <view class="error-list" wx:else>
+    <!-- 全部测试按钮 -->
+    <view class="test-all-section">
+      <button class="btn btn-primary test-all-btn" bind:tap="testAllErrors">
+        📝 测试全部错题
+      </button>
+    </view>
+
     <view class="day-group" wx:for="{{errorDays}}" wx:key="date">
       <view class="day-header" bind:tap="toggleDate" data-date="{{item.date}}">
         <view class="day-left">
-          <text class="day-date">{{item.date}}</text>
-          <text class="day-count">{{item.count}} 题</text>
+          <view class="date-row">
+            <text class="day-date">{{item.date}}</text>
+            <text class="day-count">{{item.count}} 题</text>
+          </view>
         </view>
-        <text class="day-arrow">{{expandedDate === item.date ? '▾' : '▸'}}</text>
+        <view class="day-actions">
+          <button class="btn-test-day" bind:tap="testErrors" data-date="{{item.date}}" catchtap="true">测试</button>
+          <text class="day-arrow">{{expandedDate === item.date ? '▾' : '▸'}}</text>
+        </view>
       </view>
 
       <view class="day-errors" wx:if="{{expandedDate === item.date}}">
         <view class="error-item" wx:for="{{item.errors}}" wx:for-item="err" wx:key="timestamp">
-          <view class="error-top">
-            <text class="error-word">{{err.word}}</text>
-            <text class="error-type {{err.type === 'choice' ? 'type-choice' : 'type-spell'}}">
-              {{err.type === 'choice' ? '选择' : '默写'}}
-            </text>
+          <view class="error-content">
+            <view class="error-top">
+              <text class="error-word">{{err.word}}</text>
+              <text class="error-type {{err.type === 'choice' ? 'type-choice' : 'type-spell'}}">
+                {{err.type === 'choice' ? '选择' : '默写'}}
+              </text>
+            </view>
+            <text class="error-meaning">{{err.meaning}}</text>
+            <view class="error-answers">
+              <view class="answer-row">
+                <text class="answer-label wrong-label">你的答案</text>
+                <text class="answer-value wrong-value">{{err.userAnswer || '(空)'}}</text>
+              </view>
+              <view class="answer-row">
+                <text class="answer-label correct-label">正确答案</text>
+                <text class="answer-value correct-value">{{err.correctAnswer}}</text>
+              </view>
+            </view>
           </view>
-          <text class="error-meaning">{{err.meaning}}</text>
-          <view class="error-answers">
-            <view class="answer-row">
-              <text class="answer-label wrong-label">你的答案</text>
-              <text class="answer-value wrong-value">{{err.userAnswer || '(空)'}}</text>
-            </view>
-            <view class="answer-row">
-              <text class="answer-label correct-label">正确答案</text>
-              <text class="answer-value correct-value">{{err.correctAnswer}}</text>
-            </view>
+          <view class="error-actions">
+            <button class="btn-action-review" bind:tap="addToReview" data-word="{{err.word}}" data-date="{{item.date}}" data-index="{{err.timestamp}}">加入复习</button>
+            <button class="btn-action-master" bind:tap="markMastered" data-word="{{err.word}}" data-date="{{item.date}}" data-index="{{err.timestamp}}">已掌握</button>
           </view>
         </view>
       </view>
@@ -44,5 +62,18 @@
   <!-- 清空按钮 -->
   <view class="clear-section" wx:if="{{errorDays.length > 0}}">
     <button class="btn btn-gray clear-btn" bind:tap="clearAll">清空错题本</button>
+  </view>
+
+  <!-- 标记掌握确认弹窗 -->
+  <view class="modal-overlay" wx:if="{{masteringWord}}">
+    <view class="modal-content">
+      <text class="modal-title">确认已掌握？</text>
+      <text class="modal-word">{{masteringWord.word}}</text>
+      <text class="modal-desc">该错题将从错题本中移除</text>
+      <view class="modal-buttons">
+        <button class="modal-btn cancel" bind:tap="cancelMarkMastered">取消</button>
+        <button class="modal-btn confirm" bind:tap="confirmMarkMastered">确认</button>
+      </view>
+    </view>
   </view>
 </view>

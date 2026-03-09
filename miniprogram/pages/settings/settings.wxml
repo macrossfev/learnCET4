@@ -38,6 +38,14 @@
         </view>
       </view>
     </picker>
+
+    <view class="divider"></view>
+
+    <!-- 复习提醒 -->
+    <view class="setting-item flex-between">
+      <text class="setting-label">复习提醒</text>
+      <switch checked="{{reviewReminder}}" bindchange="onReviewReminderChange" color="#2B5EA7" />
+    </view>
   </view>
 
   <!-- 数据管理分组 -->
@@ -54,11 +62,32 @@
       <text class="setting-label danger-color">清除本地缓存</text>
       <text class="arrow">></text>
     </view>
+
+    <view class="divider"></view>
+
+    <view class="setting-item flex-between" bindtap="backupData">
+      <text class="setting-label">备份学习数据</text>
+      <text class="arrow">></text>
+    </view>
+
+    <view class="divider"></view>
+
+    <view class="setting-item flex-between" bindtap="restoreData">
+      <text class="setting-label">恢复学习数据</text>
+      <text class="arrow">></text>
+    </view>
   </view>
 
-  <!-- 关于 -->
-  <view class="section-title">关于</view>
+  <!-- 关于与反馈 -->
+  <view class="section-title">关于与反馈</view>
   <view class="card settings-group">
+    <view class="setting-item flex-between" bindtap="openFeedback">
+      <text class="setting-label">意见反馈</text>
+      <text class="arrow">></text>
+    </view>
+
+    <view class="divider"></view>
+
     <view class="setting-item flex-between">
       <text class="setting-label">版本号</text>
       <text class="setting-info">v{{version}}</text>

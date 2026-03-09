@@ -7,7 +7,14 @@ Page({
     reviewItems: [],
     currentIndex: 0,
     progressId: '',
-    completed: false
+    completed: false,
+    // Feedback state
+    showFeedback: false,
+    feedbackType: '', // 'success' | 'encourage'
+    feedbackText: '',
+    // Summary stats
+    rememberedCount: 0,
+    forgotCount: 0
   },
 
   onLoad() {
@@ -39,7 +46,9 @@ Page({
         words: result.words,
         reviewItems: progress.review_queue || [],
         currentIndex: 0,
-        completed: false
+        completed: false,
+        rememberedCount: 0,
+        forgotCount: 0
       })
     } catch (err) {
       console.error('加载复习列表失败', err)
@@ -51,10 +60,32 @@ Page({
 
   async onRemembered() {
     await this._updateReview(true)
+    this._showFeedback('success')
   },
 
   async onForgot() {
     await this._updateReview(false)
+    this._showFeedback('encourage')
+  },
+
+  _showFeedback(type) {
+    const feedbackMap = {
+      success: { text: '🎉 太棒了!', type: 'success' },
+      encourage: { text: '💪 下次一定行!', type: 'encourage' }
+    }
+    const feedback = feedbackMap[type]
+    
+    this.setData({
+      showFeedback: true,
+      feedbackText: feedback.text,
+      feedbackType: feedback.type,
+      rememberedCount: type === 'success' ? this.data.rememberedCount + 1 : this.data.rememberedCount,
+      forgotCount: type === 'encourage' ? this.data.forgotCount + 1 : this.data.forgotCount
+    })
+
+    setTimeout(() => {
+      this.setData({ showFeedback: false })
+    }, 1500)
   },
 
   async _updateReview(remembered) {
@@ -93,10 +124,14 @@ Page({
   },
 
   next() {
-    const { currentIndex, words } = this.data
+    const { currentIndex, words, rememberedCount, forgotCount } = this.data
     const nextIndex = currentIndex + 1
     if (nextIndex >= words.length) {
-      this.setData({ completed: true })
+      this.setData({ 
+        completed: true,
+        rememberedCount,
+        forgotCount
+      })
     } else {
       this.setData({ currentIndex: nextIndex })
     }

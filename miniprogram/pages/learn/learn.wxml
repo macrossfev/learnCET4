@@ -18,6 +18,7 @@
   <!-- 学习阶段：单词卡片 -->
   <view class="card-area" wx:if="{{words.length > 0 && !allDone && phase === 'learn'}}">
     <word-card
+      id="wordCard"
       word="{{words[currentIndex]}}"
       autoShowDetail="{{true}}"
       bind:sequenceComplete="onSequenceComplete"
@@ -116,7 +117,7 @@
 
     <button
       class="btn btn-primary btn-action btn-quiz"
-      bind:tap="startQuiz"
+      bind:tap="showQuizNotice"
     >开始测试</button>
 
     <button
@@ -124,5 +125,21 @@
       disabled="{{currentIndex >= words.length - 1}}"
       bind:tap="nextWord"
     >下一词</button>
+  </view>
+
+  <!-- 测试前提示弹窗 -->
+  <view class="quiz-notice-modal" wx:if="{{showQuizNotice}}">
+    <view class="modal-mask" bind:tap="hideQuizNotice"></view>
+    <view class="modal-content">
+      <view class="modal-icon">📝</view>
+      <view class="modal-title">学完测试时间</view>
+      <view class="modal-word">{{words[currentIndex].word}}</view>
+      <view class="modal-phonetic" wx:if="{{words[currentIndex].phonetic}}">{{words[currentIndex].phonetic}}</view>
+      <view class="modal-hint">准备好了吗？</view>
+      <view class="modal-buttons">
+        <button class="modal-btn modal-btn-skip" bind:tap="skipQuiz">跳过</button>
+        <button class="modal-btn modal-btn-start" bind:tap="startQuiz">开始测试</button>
+      </view>
+    </view>
   </view>
 </view>

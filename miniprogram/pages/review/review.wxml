@@ -2,10 +2,24 @@
   <!-- 完成提示 -->
   <view class="complete-wrap" wx:if="{{completed}}">
     <view class="complete-card card">
-      <image class="complete-icon" src="/images/icon_complete.png" mode="aspectFit" />
+      <view class="complete-icon">🎉</view>
       <text class="complete-title">复习完成!</text>
-      <text class="complete-desc" wx:if="{{words.length > 0}}">你已复习完今天的 {{words.length}} 个单词</text>
-      <text class="complete-desc" wx:else>今天没有需要复习的单词</text>
+      <view class="complete-stats">
+        <view class="stat-item">
+          <text class="stat-number">{{words.length}}</text>
+          <text class="stat-label">本次复习</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-number success">{{rememberedCount}}</text>
+          <text class="stat-label">已掌握</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-number warn">{{forgotCount}}</text>
+          <text class="stat-label">需再复习</text>
+        </view>
+      </view>
+      <text class="complete-desc" wx:if="{{rememberedCount > 0}}">太棒了！{{rememberedCount}} 个单词已掌握</text>
+      <text class="complete-desc" wx:if="{{forgotCount > 0}}">加油！{{forgotCount}} 个单词需要再次复习</text>
       <button class="btn btn-primary mt-lg" bindtap="goBack">返回首页</button>
     </view>
   </view>
@@ -23,6 +37,13 @@
     <!-- 单词卡片 -->
     <view class="card-area">
       <word-card word="{{words[currentIndex]}}" autoShowDetail="{{true}}" />
+    </view>
+
+    <!-- 即时反馈动画 -->
+    <view class="feedback-overlay" wx:if="{{showFeedback}}">
+      <view class="feedback-bubble {{feedbackType}}">
+        <text class="feedback-text">{{feedbackText}}</text>
+      </view>
     </view>
 
     <!-- 底部按钮 -->

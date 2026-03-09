@@ -1,5 +1,6 @@
 {
   "pages": [
+    "pages/guide/guide",
     "pages/index/index",
     "pages/learn/learn",
     "pages/review/review",
@@ -7,7 +8,8 @@
     "pages/test/spell/spell",
     "pages/stats/stats",
     "pages/settings/settings",
-    "pages/errors/errors"
+    "pages/errors/errors",
+    "pages/share/share"
   ],
   "window": {
     "navigationBarBackgroundColor": "#1E4D8C",

@@ -1,5 +1,11 @@
+/**
+ * 默写测试页面
+ */
 const db = require('../../../utils/db')
 const audio = require('../../../utils/audio')
+const { handleError } = require('../../../utils/error')
+const { shuffle, safePercent } = require('../../../utils/common')
+const constants = require('../../../utils/constants')
 
 Page({
   data: {
@@ -17,13 +23,24 @@ Page({
     progressId: ''
   },
 
+  _loadStartTime: 0,
+
   onLoad(options) {
+    this._loadStartTime = Date.now()
     this.unitFromUrl = options.unit ? parseInt(options.unit) : null
     this.loadWords()
   },
 
   onUnload() {
     audio.stop()
+    this._recordLoadTime()
+  },
+
+  _recordLoadTime() {
+    const loadTime = Date.now() - this._loadStartTime
+    if (loadTime > 3000) {
+      console.warn('页面加载过慢:', loadTime, 'ms')
+    }
   },
 
   async loadWords() {
@@ -31,7 +48,7 @@ Page({
     try {
       const app = getApp()
       const level = app.globalData.settings.level || 'CET4'
-      const dailyCount = app.globalData.settings.dailyCount || 20
+      const dailyCount = app.globalData.settings.dailyCount || constants.DEFAULT_DAILY_COUNT
       const progress = await db.getUserProgress(level)
 
       if (!progress || !progress.learned_words || progress.learned_words.length === 0) {
@@ -42,7 +59,6 @@ Page({
 
       this.setData({ progressId: progress._id })
 
-      // 优先使用URL传入的unit，否则取当前单元
       const currentUnit = this.unitFromUrl || progress.current_unit || 1
       const startRank = (currentUnit - 1) * dailyCount + 1
       const endRank = currentUnit * dailyCount
@@ -55,24 +71,12 @@ Page({
         return
       }
 
-      // 随机打乱顺序
-      const shuffled = this.shuffle(words)
+      const shuffled = shuffle(words)
       this.setData({ words: shuffled })
-    } catch (err) {
-      console.error('加载单词失败', err)
-      wx.showToast({ title: '加载失败', icon: 'none' })
-    } finally {
       wx.hideLoading()
+    } catch (err) {
+      handleError(err, '加载失败')
     }
-  },
-
-  shuffle(arr) {
-    const result = [...arr]
-    for (let i = result.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [result[i], result[j]] = [result[j], result[i]]
-    }
-    return result
   },
 
   onInputChange(e) {
@@ -91,7 +95,6 @@ Page({
     const correct = correctWord.toLowerCase()
     const isCorrect = userInput === correct
 
-    // 逐字符比对，标记差异
     const maxLen = Math.max(userInput.length, correct.length)
     const diffChars = []
     for (let i = 0; i < maxLen; i++) {
@@ -134,7 +137,7 @@ Page({
     const nextIndex = currentIndex + 1
 
     if (nextIndex >= words.length) {
-      const accuracy = words.length > 0 ? Math.round(this.data.score / words.length * 100) : 0
+      const accuracy = safePercent(this.data.score, words.length)
       this.setData({ finished: true, accuracy })
       this.saveScore()
     } else {
@@ -156,7 +159,7 @@ Page({
     try {
       await db.updateTestScore(progressId, score, words.length)
     } catch (err) {
-      console.error('保存测试成绩失败', err)
+      handleError(err, '保存成绩失败', { showToast: false })
     }
   },
 

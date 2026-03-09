@@ -7,7 +7,7 @@
     </view>
     <view class="stat-item">
       <text class="stat-number">{{streakDays}}</text>
-      <text class="stat-label">连续打卡(天)</text>
+      <text class="stat-label">连续打卡 (天)</text>
     </view>
     <view class="stat-item">
       <text class="stat-number">{{todayLearned}}</text>
@@ -34,6 +34,40 @@
       <text class="muted-color text-small">{{totalLearned}} / {{totalWords}}</text>
     </view>
     <progress-bar percent="{{progressPercent}}" showLabel="{{true}}" label="已掌握" />
+  </view>
+
+  <!-- 预计完成时间 -->
+  <view class="card estimate-card">
+    <view class="estimate-title">📅 预计完成</view>
+    <view class="estimate-content">
+      <text class="estimate-days">{{estimatedDays}} 天</text>
+      <text class="estimate-hint">按当前进度，每天 {{dailyCount}} 词</text>
+    </view>
+  </view>
+
+  <!-- 近 7 天学习趋势 -->
+  <view class="card trend-card">
+    <view class="trend-title">📊 近 7 天学习</view>
+    <view class="trend-chart">
+      <view class="trend-bar" wx:for="{{weeklyTrend}}" wx:key="day">
+        <view class="trend-day">{{item.day}}</view>
+        <view class="trend-bar-wrap">
+          <view class="trend-bar-fill" style="height: {{item.learned > 0 ? Math.max(10, item.learned / 30 * 100) : 10}}%"></view>
+        </view>
+        <view class="trend-value">{{item.learned}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 成就徽章 -->
+  <view class="card badges-card">
+    <view class="badges-title">🏅 成就徽章</view>
+    <view class="badges-grid">
+      <view class="badge-item {{badge.unlocked ? 'unlocked' : 'locked'}}" wx:for="{{badges}}" wx:key="name">
+        <view class="badge-icon">{{badge.icon}}</view>
+        <view class="badge-name">{{badge.name}}</view>
+      </view>
+    </view>
   </view>
 </view>
 

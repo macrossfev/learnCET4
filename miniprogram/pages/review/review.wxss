@@ -83,3 +83,93 @@
   color: #8494A7;
   margin-bottom: 16rpx;
 }
+
+/* 完成页统计 */
+.complete-stats {
+  display: flex;
+  gap: 40rpx;
+  margin: 40rpx 0;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-number {
+  font-size: 48rpx;
+  font-weight: 700;
+  color: #2B5EA7;
+}
+
+.stat-number.success {
+  color: #1A8A5C;
+}
+
+.stat-number.warn {
+  color: #D4860B;
+}
+
+.stat-label {
+  font-size: 24rpx;
+  color: #8494A7;
+  margin-top: 8rpx;
+}
+
+/* 即时反馈动画 */
+.feedback-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.feedback-bubble {
+  background: #fff;
+  border-radius: 48rpx;
+  padding: 32rpx 64rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.15);
+  animation: popIn 0.3s ease-out;
+}
+
+.feedback-bubble.success {
+  background: linear-gradient(135deg, #EDFAF0, #E0F5E4);
+  border: 2rpx solid #1A8A5C;
+}
+
+.feedback-bubble.encourage {
+  background: linear-gradient(135deg, #FFF6EE, #FFF0E0);
+  border: 2rpx solid #D4860B;
+}
+
+.feedback-text {
+  font-size: 40rpx;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.feedback-bubble.success .feedback-text {
+  color: #1A8A5C;
+}
+
+.feedback-bubble.encourage .feedback-text {
+  color: #D4860B;
+}
+
+@keyframes popIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
