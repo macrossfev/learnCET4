@@ -80,6 +80,18 @@
     <progress-bar percent="{{totalPercent}}" label="已掌握" showLabel="{{true}}" />
   </view>
 
+  <!-- 当前单元 -->
+  <view class="unit-section">
+    <view class="unit-header">
+      <text class="unit-title">📖 当前单元</text>
+      <text class="unit-num">{{progress.current_unit || 1}} / {{maxUnit}}</text>
+    </view>
+    <view class="unit-progress">
+      <view class="unit-bar" style="width: {{unitPercent}}%"></view>
+    </view>
+    <text class="unit-desc">本单元已学 {{currentUnitLearned}} / {{dailyCount}} 词</text>
+  </view>
+
   <!-- 打卡天数底部 -->
   <view class="streak-section" wx:if="{{streakDays > 0}}">
     <view class="streak-icon-wrap">

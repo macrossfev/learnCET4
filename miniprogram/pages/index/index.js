@@ -1,5 +1,6 @@
 const db = require('../../utils/db')
 const review = require('../../utils/review')
+const constants = require('../../utils/constants')
 
 const TOTAL_WORDS = 1000
 
@@ -12,7 +13,11 @@ Page({
     totalPercent: 0,
     streakDays: 0,
     dailyCount: 20,
-    progress: null
+    progress: null,
+    // 单元进度
+    maxUnit: 0,
+    currentUnitLearned: 0,
+    unitPercent: 0
   },
 
   onShow() {
@@ -56,6 +61,13 @@ Page({
 
       // 连续打卡天数
       const streakDays = stats.streak_days || 0
+      
+      // 计算单元进度
+      const currentUnit = progress.current_unit || 1
+      const maxUnit = Math.ceil(TOTAL_WORDS / dailyCount)
+      const unitStart = (currentUnit - 1) * dailyCount
+      const currentUnitLearned = Math.min(dailyCount, Math.max(0, totalLearned - unitStart))
+      const unitPercent = dailyCount > 0 ? Math.round((currentUnitLearned / dailyCount) * 100) : 0
 
       this.setData({
         progress,
@@ -65,7 +77,10 @@ Page({
         totalLearned,
         totalPercent,
         streakDays,
-        dailyCount
+        dailyCount,
+        maxUnit,
+        currentUnitLearned,
+        unitPercent
       })
     } catch (err) {
       console.error('加载进度失败', err)

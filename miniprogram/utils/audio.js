@@ -206,6 +206,53 @@ async function preloadUnitAudio(words) {
   return results.filter(Boolean)
 }
 
+/**
+ * 预加载单个音频文件
+ * @param {string} fileID - 云存储文件 ID
+ * @returns {Promise<Object>} 预加载结果
+ */
+async function preloadAudio(fileID) {
+  if (!fileID || !fileID.startsWith('cloud://')) return null
+  try {
+    const res = await wx.cloud.downloadFile({ fileID })
+    return { fileID, tempFilePath: res.tempFilePath }
+  } catch (err) {
+    console.error('预加载音频失败', err)
+    return null
+  }
+}
+
+/**
+ * 批量预加载音频（带进度回调）
+ * @param {Array} fileIDs - 文件 ID 列表
+ * @param {Function} onProgress - 进度回调 (current, total)
+ * @returns {Promise<Array>} 预加载结果
+ */
+async function batchPreloadAudio(fileIDs, onProgress) {
+  const results = []
+  const total = fileIDs.length
+  for (let i = 0; i < total; i++) {
+    const result = await preloadAudio(fileIDs[i])
+    results.push(result)
+    if (onProgress) onProgress(i + 1, total)
+  }
+  return results.filter(Boolean)
+}
+
+/**
+ * 清理音频缓存（保留最近的 N 个单元）
+ * @param {number} keepCount - 保留数量
+ */
+function clearAudioCache(keepCount = 5) {
+  const storageInfo = wx.getStorageInfoSync()
+  const keys = storageInfo.keys || []
+  const audioKeys = keys.filter(key => key.startsWith('audio_cache_'))
+  if (audioKeys.length > keepCount) {
+    const toRemove = audioKeys.slice(0, audioKeys.length - keepCount)
+    toRemove.forEach(key => wx.removeStorageSync(key))
+  }
+}
+
 module.exports = {
   playWordSequence,
   playSingle,
@@ -214,5 +261,8 @@ module.exports = {
   resume,
   getIsPlaying,
   destroy,
-  preloadUnitAudio
+  preloadUnitAudio,
+  preloadAudio,
+  batchPreloadAudio,
+  clearAudioCache
 }

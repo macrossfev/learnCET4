@@ -1,0 +1,63 @@
+<view class="word-quiz-card">
+  <!-- 单词部分 -->
+  <view class="word-section">
+    <text class="word-text">{{word.word}}</text>
+    <text class="phonetic-text">{{word.phonetic}}</text>
+    
+    <view class="audio-btn-wrap">
+      <button class="audio-btn" bindtap="onPlayWord" hover-class="audio-btn-hover">
+        <text>🔊</text>
+      </button>
+    </view>
+  </view>
+
+  <!-- 释义部分（回想模式） -->
+  <view class="meaning-section {{localShowAnswer ? 'show' : 'hide'}}">
+    <view class="meaning-mask" wx:if="{{!localShowAnswer}}" bindtap="onShowAnswer">
+      <text class="mask-icon">👁</text>
+      <text class="mask-text">点击查看释义</text>
+    </view>
+    
+    <view class="meaning-content" wx:if="{{localShowAnswer}}">
+      <view class="meaning-item">
+        <text class="meaning-label">释义：</text>
+        <text class="meaning-text">{{word.meaning}}</text>
+      </view>
+      <view class="meaning-item" wx:if="{{word.phrase}}">
+        <text class="meaning-label">词组：</text>
+        <text class="meaning-text">{{word.phrase}}</text>
+        <text class="meaning-text muted">{{word.phrase_meaning}}</text>
+      </view>
+      <view class="meaning-item" wx:if="{{word.example}}">
+        <text class="meaning-label">例句：</text>
+        <text class="meaning-text">{{word.example}}</text>
+        <text class="meaning-text muted">{{word.example_meaning}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 掌握程度选择（显示释义后出现） -->
+  <view class="mastery-section" wx:if="{{localShowAnswer && localMasteryLevel === 0}}">
+    <text class="mastery-prompt">请选择掌握程度：</text>
+    <view class="mastery-buttons">
+      <button class="mastery-btn mastery-success" data-level="1" bindtap="onMasterySelect">
+        <text class="mastery-icon">😍</text>
+        <text class="mastery-label">熟悉</text>
+      </button>
+      <button class="mastery-btn mastery-warning" data-level="2" bindtap="onMasterySelect">
+        <text class="mastery-icon">🙂</text>
+        <text class="mastery-label">模糊</text>
+      </button>
+      <button class="mastery-btn mastery-error" data-level="3" bindtap="onMasterySelect">
+        <text class="mastery-icon">😕</text>
+        <text class="mastery-label">遗忘</text>
+      </button>
+    </view>
+  </view>
+
+  <!-- 已选择掌握程度 -->
+  <view class="mastery-selected" wx:if="{{localMasteryLevel > 0}}">
+    <text class="mastery-selected-icon">{{localMasteryLevel === 1 ? '😍' : (localMasteryLevel === 2 ? '🙂' : '😕')}}</text>
+    <text class="mastery-selected-text">{{localMasteryLevel === 1 ? '熟悉' : (localMasteryLevel === 2 ? '模糊' : '遗忘')}}</text>
+  </view>
+</view>
