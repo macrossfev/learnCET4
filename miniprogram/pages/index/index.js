@@ -99,9 +99,9 @@ Page({
   },
 
   goReview() {
-    // 跳转到复习模式选择页
+    // 直接跳转到复习页面
     wx.navigateTo({
-      url: '/pages/review-mode/review-mode'
+      url: '/pages/review/review'
     })
   },
 

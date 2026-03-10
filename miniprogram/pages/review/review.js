@@ -1,12 +1,12 @@
 /**
- * 复习页面 - 增强版
- * 功能：回想模式 + 三级掌握程度 + 丰富反馈
+ * 复习页面 - 与学习流程一致
+ * 三步流程：单词展示 → 选择题 → 填词
  */
 const db = require('../../utils/db')
 const review = require('../../utils/review')
 const constants = require('../../utils/constants')
 const audio = require('../../utils/audio')
-const { getToday } = require('../../utils/review')
+const tracking = require('../../utils/tracking')
 
 Page({
   data: {
@@ -15,73 +15,85 @@ Page({
     currentIndex: 0,
     progressId: '',
     completed: false,
-    
-    // 回想模式
-    showMeaning: false,  // 是否显示释义
-    
-    // 三级掌握程度
-    masteryLevel: 0,  // 0=未选择，1=熟悉，2=模糊，3=遗忘
-    
-    // 反馈状态
-    showFeedback: false,
-    feedbackText: '',
-    feedbackIcon: '',
-    feedbackColor: '',
-    
-    // 统计数据
-    rememberedCount: 0,
-    unsureCount: 0,
-    forgotCount: 0,
-    
-    // 复习模式
-    reviewMode: 'normal'  // normal=普通，quick=快速，test=测试
+    // 当前步骤：1=单词展示, 2=选择题, 3=填词
+    step: 1,
+    // 选择题
+    choiceOptions: [],
+    choiceSelected: -1,
+    choiceCorrect: false,
+    choiceWrong: false,
+    // 填词
+    spellInput: '',
+    spellWrong: false,
+    spellHint: '',
+    // 复习信息提示
+    reviewGroup: '',
+    reviewDay: 0,
+    reviewDate: ''
   },
 
-  _loadStartTime: 0,
+  _touchStartX: 0,
+  _touchStartY: 0,
 
-  onLoad(options) {
-    this._loadStartTime = Date.now()
-    this.setData({
-      reviewMode: options.mode || 'normal'
-    })
+  onLoad() {
     this.loadReviewList()
+  },
+
+  onUnload() {
+    audio.stop()
   },
 
   async loadReviewList() {
     wx.showLoading({ title: '加载中...' })
     try {
-      const app = getApp()
-      const level = app.globalData.settings.level || 'CET4'
+      const level = 'CET4'
       const progress = await db.getUserProgress(level)
-      
+
       if (!progress) {
         wx.hideLoading()
-        this.setData({ completed: true })
+        wx.showToast({ title: '暂无复习内容', icon: 'none' })
+        setTimeout(() => wx.navigateBack(), 1500)
         return
       }
 
-      this.setData({ progressId: progress._id })
+      // 获取今日待复习单词
+      const todayReviewWords = review.getTodayReviewWords(progress.review_queue || [])
 
-      const result = await db.getReviewList()
-      if (!result || !result.words || result.words.length === 0) {
-        this.setData({ completed: true })
+      if (todayReviewWords.length === 0) {
         wx.hideLoading()
+        wx.showToast({ title: '今日复习已完成', icon: 'success' })
+        setTimeout(() => wx.navigateBack(), 1500)
         return
       }
+
+      // 获取单词详情
+      const result = await db.getReviewList()
+      const words = result.words || []
+
+      // 获取复习信息
+      const todayGroup = review.getTodayGroup()
+      const reviewDate = new Date().toLocaleDateString('zh-CN', {
+        month: 'long',
+        day: 'numeric'
+      })
 
       this.setData({
-        words: result.words,
+        words,
         reviewItems: progress.review_queue || [],
+        progressId: progress._id,
         currentIndex: 0,
         completed: false,
-        showMeaning: false,
-        masteryLevel: 0,
-        rememberedCount: 0,
-        unsureCount: 0,
-        forgotCount: 0
+        step: 1,
+        reviewGroup: todayGroup,
+        reviewDay: Math.floor((new Date().getDate() - 1) / 3) + 1,
+        reviewDate
       })
       wx.hideLoading()
-      this._recordLoadTime()
+
+      // 播放当前单词音频
+      this._playCurrentWordAudio()
+
+      tracking.trackReviewStart(words.length)
     } catch (err) {
       console.error('加载复习列表失败', err)
       wx.hideLoading()
@@ -89,193 +101,228 @@ Page({
     }
   },
 
-  _recordLoadTime() {
-    const loadTime = Date.now() - this._loadStartTime
-    if (loadTime > 3000) {
-      console.warn('页面加载过慢:', loadTime, 'ms')
+  _playCurrentWordAudio() {
+    const { words, currentIndex, step } = this.data
+    if (!words[currentIndex]) return
+
+    const word = words[currentIndex]
+    if (step === 1 && word.audio) {
+      audio.playWordSequence(word.audio)
     }
   },
 
-  // 显示释义（回想后查看）
-  onShowMeaning() {
-    this.setData({ showMeaning: true })
+  // ===== 滑动处理 =====
+  onTouchStart(e) {
+    this._touchStartX = e.touches[0].clientX
+    this._touchStartY = e.touches[0].clientY
   },
 
-  // 选择掌握程度
-  onMasterySelect(e) {
-    const { level } = e.currentTarget.dataset
-    this.setData({ masteryLevel: level })
-    
-    const feedbackConfig = {
-      1: { icon: '😍', text: '太棒了！', color: 'success' },
-      2: { icon: '🙂', text: '再巩固下', color: 'warning' },
-      3: { icon: '😕', text: '加入复习', color: 'error' }
+  onTouchEnd(e) {
+    const deltaX = e.changedTouches[0].clientX - this._touchStartX
+    const deltaY = e.changedTouches[0].clientY - this._touchStartY
+    if (Math.abs(deltaX) < 60 || Math.abs(deltaX) < Math.abs(deltaY)) return
+
+    if (deltaX > 0) {
+      this.nextStep()
+    } else {
+      this.prevStep()
     }
-    
-    const config = feedbackConfig[level]
-    this._showFeedback(config)
-    
-    // 根据掌握程度更新复习
-    this._updateReviewWithLevel(level)
   },
 
-  // 重置当前词状态
-  onResetWord() {
-    this.setData({
-      showMeaning: false,
-      masteryLevel: 0
-    })
-  },
-
-  _showFeedback(config) {
-    this.setData({
-      showFeedback: true,
-      feedbackText: config.text,
-      feedbackIcon: config.icon,
-      feedbackColor: config.color
-    })
-
-    setTimeout(() => {
-      this.setData({ showFeedback: false })
-    }, 1200)
-  },
-
-  async _updateReviewWithLevel(level) {
-    const { currentIndex, words, progressId } = this.data
-    if (currentIndex >= words.length) return
-
-    const word = words[currentIndex].word
-    const today = getToday()
-    
-    // 根据掌握程度设置不同的复习间隔
-    const intervalsMap = {
-      1: [3, 7, 14, 30, 60],    // 熟悉：延长间隔
-      2: [1, 3, 7, 14, 30],     // 模糊：标准间隔
-      3: [1, 1, 3, 7, 14]       // 遗忘：缩短间隔
+  prevStep() {
+    const { step } = this.data
+    if (step > 1) {
+      this.setData({ step: step - 1, spellInput: '', spellWrong: false, choiceSelected: -1, choiceWrong: false })
     }
-    
-    const intervals = intervalsMap[level] || intervalsMap[2]
-    const reviewDates = intervals.map(d => {
-      const date = new Date()
-      date.setDate(date.getDate() + d)
-      return date.toISOString().split('T')[0]
-    })
+  },
 
-    const newReviewItem = {
-      word,
-      last_learned: today,
-      review_dates: reviewDates,
-      next_review: reviewDates[0],
-      stage: 0,
-      mastery: level  // 记录掌握程度
-    }
-
-    // 更新复习队列
-    const updatedQueue = this.data.reviewItems.filter(item => item.word !== word)
-    updatedQueue.push(newReviewItem)
-
-    try {
-      await db.updateReviewResult(progressId, word, level >= 2, updatedQueue)
-      this.setData({ reviewItems: updatedQueue })
-      
-      // 更新统计
-      const statsMap = {
-        1: 'rememberedCount',
-        2: 'unsureCount',
-        3: 'forgotCount'
+  nextStep() {
+    const { step } = this.data
+    if (step < 3) {
+      if (step === 1) {
+        this._prepareChoice()
       }
-      const statKey = statsMap[level]
-      this.setData({
-        [statKey]: this.data[statKey] + 1
-      })
-      
-      // 延迟进入下一个
+      audio.stop()
+      this.setData({ step: step + 1, spellInput: '', spellWrong: false })
+    }
+  },
+
+  _prepareChoice() {
+    const { words, currentIndex } = this.data
+    const currentWord = words[currentIndex]
+    const options = this._generateChoices(currentWord, words)
+    this.setData({
+      choiceOptions: options,
+      choiceSelected: -1,
+      choiceCorrect: false,
+      choiceWrong: false
+    })
+  },
+
+  _generateChoices(currentWord, allWords) {
+    const others = allWords.filter(w => w.word !== currentWord.word)
+    for (let i = others.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [others[i], others[j]] = [others[j], others[i]]
+    }
+    const wrongItems = others.slice(0, 3)
+
+    const options = [
+      { meaning: currentWord.meaning, correct: true },
+      ...wrongItems.map(w => ({ meaning: w.meaning, correct: false }))
+    ]
+    for (let i = options.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [options[i], options[j]] = [options[j], options[i]]
+    }
+    return options
+  },
+
+  // ===== 选择题 =====
+  onChoiceSelect(e) {
+    const index = e.currentTarget.dataset.index
+    const option = this.data.choiceOptions[index]
+    const correct = option.correct
+
+    this.setData({
+      choiceSelected: index,
+      choiceCorrect: correct,
+      choiceWrong: !correct
+    })
+
+    const currentWord = this.data.words[this.data.currentIndex]
+
+    if (correct) {
+      tracking.trackQuizChoice(currentWord.word, true, option.meaning)
       setTimeout(() => {
-        this.next()
+        this.setData({ step: 3, spellInput: '', spellWrong: false })
       }, 800)
+    } else {
+      tracking.trackQuizChoice(currentWord.word, false, option.meaning)
+      this._saveError(currentWord, 'choice', option.meaning, currentWord.meaning)
+      setTimeout(() => {
+        this.setData({ choiceSelected: -1, choiceWrong: false })
+      }, 1500)
+    }
+  },
+
+  // ===== 填词 =====
+  onSpellInput(e) {
+    this.setData({ spellInput: e.detail.value, spellWrong: false })
+  },
+
+  async onSpellSubmit() {
+    const { words, currentIndex, spellInput, reviewItems, progressId } = this.data
+    if (!spellInput.trim()) return
+
+    const currentWord = words[currentIndex]
+    const input = spellInput.trim().toLowerCase()
+    const expected = currentWord.word.toLowerCase()
+    const isCorrect = input === expected
+
+    if (isCorrect) {
+      tracking.trackQuizSpell(currentWord.word, true, input)
+      tracking.trackReviewWord(currentWord.word, true)
+
+      // 更新复习结果
+      await this._updateReviewResult(currentWord.word, true)
+
+      // 进入下一词
+      this._goNextWord()
+    } else {
+      tracking.trackQuizSpell(currentWord.word, false, input)
+      tracking.trackReviewWord(currentWord.word, false)
+      this._saveError(currentWord, 'spell', input, expected)
+      this.setData({
+        spellWrong: true,
+        spellHint: `正确答案：${currentWord.word}`,
+        spellInput: ''
+      })
+      setTimeout(() => {
+        this.setData({ spellWrong: false, spellHint: '' })
+      }, 2000)
+    }
+  },
+
+  async _updateReviewResult(word, remembered) {
+    const { reviewItems, progressId } = this.data
+    try {
+      await db.updateReviewResult(progressId, word, remembered, reviewItems)
     } catch (err) {
       console.error('更新复习结果失败', err)
-      this.next()
     }
   },
 
-  next() {
+  _saveError(word, type, userAnswer, correctAnswer) {
+    const today = new Date().toISOString().split('T')[0]
+    const errorBook = wx.getStorageSync('error_book') || {}
+    if (!errorBook[today]) errorBook[today] = []
+    errorBook[today].push({
+      word: word.word,
+      meaning: word.meaning,
+      type,
+      userAnswer: userAnswer || '',
+      correctAnswer,
+      timestamp: Date.now()
+    })
+    wx.setStorageSync('error_book', errorBook)
+  },
+
+  // ===== 底部按钮 =====
+  onPrevWord() {
+    const { currentIndex } = this.data
+    if (currentIndex <= 0) {
+      wx.showToast({ title: '已是第一个', icon: 'none' })
+      return
+    }
+    audio.stop()
+    this.setData({
+      currentIndex: currentIndex - 1,
+      step: 1,
+      choiceSelected: -1,
+      choiceCorrect: false,
+      choiceWrong: false,
+      spellInput: '',
+      spellWrong: false
+    })
+    this._playCurrentWordAudio()
+  },
+
+  onNextWord() {
+    const { step } = this.data
+    if (step < 3) {
+      wx.showToast({ title: '请完成当前单词测试', icon: 'none' })
+      return
+    }
+    this._goNextWord()
+  },
+
+  _goNextWord() {
     const { currentIndex, words } = this.data
-    const nextIndex = currentIndex + 1
-    
-    if (nextIndex >= words.length) {
+    if (currentIndex >= words.length - 1) {
       this._completeReview()
     } else {
+      audio.stop()
       this.setData({
-        currentIndex: nextIndex,
-        showMeaning: false,
-        masteryLevel: 0
+        currentIndex: currentIndex + 1,
+        step: 1,
+        choiceSelected: -1,
+        choiceCorrect: false,
+        choiceWrong: false,
+        spellInput: '',
+        spellWrong: false,
+        spellHint: ''
       })
+      this._playCurrentWordAudio()
     }
   },
 
   _completeReview() {
-    const { rememberedCount, unsureCount, forgotCount, words } = this.data
-    const today = new Date().toLocaleDateString('zh-CN', {
-      month: 'long',
-      day: 'numeric'
-    })
-    
-    this.setData({
-      completed: true,
-      rememberedCount,
-      unsureCount,
-      forgotCount,
-      reviewDate: today
-    })
-  },
-
-  // 计算掌握率
-  _calculateMasteryRate() {
-    const { rememberedCount, unsureCount, forgotCount } = this.data
-    const total = rememberedCount + unsureCount + forgotCount
-    if (total === 0) return 0
-    // 熟悉算 100%，模糊算 50%，遗忘算 0%
-    const score = rememberedCount + (unsureCount * 0.5)
-    return Math.round((score / total) * 100)
-  },
-
-  // 获取复习建议
-  _getSuggestion() {
-    const { rememberedCount, unsureCount, forgotCount } = this.data
-    const total = rememberedCount + unsureCount + forgotCount
-    
-    if (forgotCount > total * 0.5) {
-      return '遗忘较多，建议明天再次复习这些单词'
-    }
-    if (unsureCount > total * 0.5) {
-      return '模糊较多，建议重点巩固这些单词'
-    }
-    if (rememberedCount === total) {
-      return '太棒了！全部掌握，继续保持'
-    }
-    return '复习效果不错，继续加油'
+    this.setData({ completed: true })
+    tracking.trackReviewComplete(this.data.words.length, this.data.words.length, 0)
   },
 
   goBack() {
     wx.navigateBack()
-  },
-
-  // 跳过当前词
-  onSkip() {
-    this.next()
-  },
-
-  // 播放单词发音
-  onPlayWord() {
-    const { words, currentIndex } = this.data
-    const word = words[currentIndex]
-    if (word && word.audio && word.audio.word) {
-      audio.playSingle(word.audio.word)
-    }
-  },
-
-  onUnload() {
-    audio.stop()
   }
 })
