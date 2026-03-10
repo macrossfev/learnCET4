@@ -104,17 +104,21 @@ async function updateProgress(progressId, data) {
 
 /**
  * 标记单词已学习
+ * 新增分组支持
  */
-async function markWordLearned(progressId, word, learnedWords, reviewQueue) {
+async function markWordLearned(progressId, word, learnedWords, reviewQueue, wordIndex) {
+  const review = require('./review')
   const today = new Date().toISOString().split('T')[0]
-  const reviewDates = constants.REVIEW_INTERVALS.map(d => {
-    const date = new Date()
-    date.setDate(date.getDate() + d)
-    return date.toISOString().split('T')[0]
-  })
+
+  // 分配分组
+  const group = review.assignGroup((learnedWords || []).length)
+
+  // 基于分组计算复习日期
+  const reviewDates = review.calculateReviewDates(group)
 
   const newReviewItem = {
     word,
+    group,
     last_learned: today,
     review_dates: reviewDates,
     next_review: reviewDates[0],
@@ -149,27 +153,28 @@ async function getReviewList() {
 
 /**
  * 更新复习结果
+ * 支持分组复习逻辑
  */
 async function updateReviewResult(progressId, word, remembered, reviewQueue) {
+  const review = require('./review')
   const today = new Date().toISOString().split('T')[0]
   const newQueue = (reviewQueue || []).map(item => {
     if (item.word !== word) return item
     if (remembered) {
       const nextStage = item.stage + 1
-      if (nextStage >= item.review_dates.length) {
+      if (nextStage >= constants.REVIEW_INTERVALS.length) {
         return { ...item, stage: nextStage, next_review: null }
       }
+      // 使用基于分组的复习日期
+      const nextReviewDate = item.review_dates[nextStage]
       return {
         ...item,
         stage: nextStage,
-        next_review: item.review_dates[nextStage]
+        next_review: nextReviewDate
       }
     } else {
-      const reviewDates = constants.REVIEW_INTERVALS.map(d => {
-        const date = new Date()
-        date.setDate(date.getDate() + d)
-        return date.toISOString().split('T')[0]
-      })
+      // 忘记了，重新计算复习日期（保持原分组）
+      const reviewDates = review.calculateReviewDates(item.group || 'A')
       return {
         ...item,
         last_learned: today,

@@ -62,7 +62,7 @@ function track(eventName, params = {}) {
   addToQueue(event)
 
   // 开发环境打印日志
-  if (config.DEBUG) {
+  if (config.debug) {
     console.log('[Track]', eventName, params)
   }
 }
