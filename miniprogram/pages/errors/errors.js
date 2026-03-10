@@ -1,4 +1,5 @@
 const db = require('../../utils/db')
+const review = require('../../utils/review')
 const constants = require('../../utils/constants')
 
 Page({
@@ -109,7 +110,7 @@ Page({
   async addToReview(e) {
     const { word, date, index } = e.currentTarget.dataset
     wx.showLoading({ title: '添加中...' })
-    
+
     try {
       const level = 'CET4'
       const progress = await db.getUserProgress(level)
@@ -120,25 +121,23 @@ Page({
       }
 
       const today = new Date().toISOString().split('T')[0]
-      const intervals = [1, 3, 7, 14, 30]
-      const reviewDates = intervals.map(d => {
-        const date = new Date()
-        date.setDate(date.getDate() + d)
-        return date.toISOString().split('T')[0]
-      })
+      // 使用新的分组复习日期计算
+      const group = review.assignGroup((progress.learned_words || []).length)
+      const reviewDates = review.calculateReviewDates(group)
 
       // Check if already in review queue
       const exists = progress.review_queue.some(item => item.word === word)
       if (!exists) {
         const newReviewItem = {
           word,
+          group,
           last_learned: today,
           review_dates: reviewDates,
           next_review: reviewDates[0],
           stage: 0
         }
         const newReviewQueue = [...progress.review_queue, newReviewItem]
-        
+
         await db.updateProgress(progress._id, {
           review_queue: newReviewQueue
         })

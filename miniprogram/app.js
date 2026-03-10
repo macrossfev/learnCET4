@@ -47,7 +47,7 @@ App({
   globalData: {
     openid: null,
     settings: {
-      dailyCount: 20,
+      dailyCount: 25,
       playMode: 'manual',
       playSpeed: 1.0
     }
