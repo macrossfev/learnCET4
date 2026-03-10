@@ -4,7 +4,7 @@
 const app = getApp()
 const audio = require('../../utils/audio')
 const constants = require('../../utils/constants')
-const tracker = require('../../utils/tracking')
+const tracking = require('../../utils/tracking')
 
 Page({
   data: {
@@ -34,7 +34,7 @@ Page({
     this.updateCacheStats()
 
     // 埋点：页面访问
-    tracker.trackPageView('settings')
+    tracking.trackPageView('settings')
   },
 
   onShow() {
@@ -63,7 +63,7 @@ Page({
     this.saveSetting('dailyCount', count)
 
     // 埋点：设置变更
-    tracker.trackSettingChange('dailyCount', this.data.dailyCountOptions[this.data.dailyCountIndex], count)
+    tracking.trackSettingChange('dailyCount', this.data.dailyCountOptions[this.data.dailyCountIndex], count)
   },
 
   onPlayModeChange(e) {
@@ -73,7 +73,7 @@ Page({
     this.saveSetting('playMode', mode)
 
     // 埋点：设置变更
-    tracker.trackSettingChange('playMode', this.data.playModeIndex === 0 ? 'manual' : 'continuous', mode)
+    tracking.trackSettingChange('playMode', this.data.playModeIndex === 0 ? 'manual' : 'continuous', mode)
   },
 
   onSpeedChange(e) {
@@ -83,7 +83,7 @@ Page({
     this.saveSetting('playSpeed', speed)
 
     // 埋点：设置变更
-    tracker.trackSettingChange('playSpeed', this.data.speedValues[this.data.speedIndex], speed)
+    tracking.trackSettingChange('playSpeed', this.data.speedValues[this.data.speedIndex], speed)
   },
 
   onReviewReminderChange(e) {

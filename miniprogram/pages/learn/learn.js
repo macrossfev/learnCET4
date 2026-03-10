@@ -2,7 +2,7 @@ const db = require('../../utils/db')
 const audio = require('../../utils/audio')
 const review = require('../../utils/review')
 const constants = require('../../utils/constants')
-const tracker = require('../../utils/tracker')
+const tracking = require('../../utils/tracking')
 
 Page({
   data: {
@@ -51,7 +51,7 @@ Page({
     this._startAutoSave()
 
     // 埋点：页面访问
-    tracker.trackPageView('learn')
+    tracking.trackPageView('learn')
   },
 
   _checkInterruptedProgress() {
@@ -164,7 +164,7 @@ Page({
       wx.hideLoading()
 
       // 埋点：开始学习
-      tracker.trackLearnStart(unit, unlearnedWords.length)
+      tracking.trackLearnStart(unit, unlearnedWords.length)
     } catch (err) {
       wx.hideLoading()
       console.error('加载单词失败', err)
@@ -237,7 +237,7 @@ Page({
     const currentWord = words[currentIndex]
 
     // 埋点：跳过测试
-    tracker.trackQuizSkip(currentWord.word)
+    tracking.trackQuizSkip(currentWord.word)
 
     wx.showToast({ title: '已加入复习', icon: 'none' })
     // Move to next word or finish
@@ -268,7 +268,7 @@ Page({
     })
 
     // 埋点：开始测试
-    tracker.trackQuizStart(currentWord.word)
+    tracking.trackQuizStart(currentWord.word)
   },
 
   _generateChoices(currentWord, allWords) {
@@ -306,7 +306,7 @@ Page({
     const currentWord = this.data.words[this.data.currentIndex]
 
     // 埋点：选择题答题
-    tracker.trackQuizChoice(currentWord.word, correct, option.meaning)
+    tracking.trackQuizChoice(currentWord.word, correct, option.meaning)
 
     if (!correct) {
       this._saveError(currentWord, 'choice', option.meaning, currentWord.meaning)
@@ -351,7 +351,7 @@ Page({
     })
 
     // 埋点：默写答题
-    tracker.trackQuizSpell(currentWord.word, isCorrect, input)
+    tracking.trackQuizSpell(currentWord.word, isCorrect, input)
 
     if (!isCorrect) {
       this._saveError(currentWord, 'spell', input, expected)
@@ -464,7 +464,7 @@ Page({
     }
 
     // 埋点：学习完成
-    tracker.trackLearnComplete(unit, todayLearned.length, duration)
+    tracking.trackLearnComplete(unit, todayLearned.length, duration)
 
     // 如果有学习新词，显示庆祝动画
     if (todayLearned.length > 0) {
