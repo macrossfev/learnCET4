@@ -1,0 +1,119 @@
+.celebration-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.celebration-container.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* 彩带粒子 */
+.confetti-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.confetti-particle {
+  position: absolute;
+  border-radius: 4rpx;
+  animation: confetti-fall var(--duration) ease-out forwards;
+  animation-delay: var(--delay);
+  transform: rotate(var(--rotate));
+}
+
+@keyframes confetti-fall {
+  0% {
+    top: var(--start-y);
+    opacity: 1;
+    transform: rotate(var(--rotate)) translateY(0);
+  }
+  100% {
+    top: -20%;
+    opacity: 0;
+    transform: rotate(calc(var(--rotate) + 720deg)) translateY(-100rpx);
+  }
+}
+
+/* 烟花效果 */
+.firework-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.firework {
+  position: absolute;
+  width: 10rpx;
+  height: 10rpx;
+}
+
+.firework-particle {
+  position: absolute;
+  width: 8rpx;
+  height: 8rpx;
+  border-radius: 50%;
+  animation: firework-explode 1s ease-out forwards;
+}
+
+@keyframes firework-explode {
+  0% {
+    transform: rotate(var(--angle)) translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(var(--angle)) translateY(calc(var(--distance) * -1));
+    opacity: 0;
+  }
+}
+
+/* 完成提示 */
+.completion-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 10;
+}
+
+.completion-icon {
+  font-size: 120rpx;
+  animation: bounce 0.6s ease infinite alternate;
+}
+
+@keyframes bounce {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-20rpx); }
+}
+
+.completion-text {
+  font-size: 48rpx;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin-top: 24rpx;
+  text-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.3);
+}
+
+.completion-hint {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 16rpx;
+}

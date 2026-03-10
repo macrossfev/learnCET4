@@ -1,6 +1,7 @@
 {
   "usingComponents": {
-    "word-card": "/components/word-card/word-card"
+    "word-card": "/components/word-card/word-card",
+    "celebration": "/components/celebration/celebration"
   },
   "navigationBarTitleText": "学习"
 }

@@ -1,4 +1,10 @@
+/**
+ * 设置页面
+ */
 const app = getApp()
+const audio = require('../../utils/audio')
+const constants = require('../../utils/constants')
+const tracker = require('../../utils/tracking')
 
 Page({
   data: {
@@ -10,6 +16,8 @@ Page({
     speedValues: [0.8, 1.0, 1.2],
     speedIndex: 1,
     cacheSize: '计算中...',
+    cacheCount: 0,
+    cachePercent: 0,
     version: '1.0.0',
     // New features
     reviewReminder: false
@@ -23,7 +31,29 @@ Page({
       speedIndex: this.data.speedValues.indexOf(settings.playSpeed),
       reviewReminder: wx.getStorageSync('reviewReminder') || false
     })
-    this.calcCacheSize()
+    this.updateCacheStats()
+
+    // 埋点：页面访问
+    tracker.trackPageView('settings')
+  },
+
+  onShow() {
+    this.updateCacheStats()
+  },
+
+  updateCacheStats() {
+    const stats = audio.getCacheStats()
+    this.setData({
+      cacheSize: this._formatSize(stats.totalSize),
+      cacheCount: stats.count,
+      cachePercent: stats.usedPercent
+    })
+  },
+
+  _formatSize(bytes) {
+    if (bytes < 1024) return bytes + ' B'
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
   },
 
   onDailyCountChange(e) {
@@ -31,6 +61,9 @@ Page({
     const count = this.data.dailyCountOptions[index]
     this.setData({ dailyCountIndex: index })
     this.saveSetting('dailyCount', count)
+
+    // 埋点：设置变更
+    tracker.trackSettingChange('dailyCount', this.data.dailyCountOptions[this.data.dailyCountIndex], count)
   },
 
   onPlayModeChange(e) {
@@ -38,6 +71,9 @@ Page({
     const mode = index == 1 ? 'continuous' : 'manual'
     this.setData({ playModeIndex: index })
     this.saveSetting('playMode', mode)
+
+    // 埋点：设置变更
+    tracker.trackSettingChange('playMode', this.data.playModeIndex === 0 ? 'manual' : 'continuous', mode)
   },
 
   onSpeedChange(e) {
@@ -45,6 +81,9 @@ Page({
     const speed = this.data.speedValues[index]
     this.setData({ speedIndex: index })
     this.saveSetting('playSpeed', speed)
+
+    // 埋点：设置变更
+    tracker.trackSettingChange('playSpeed', this.data.speedValues[this.data.speedIndex], speed)
   },
 
   onReviewReminderChange(e) {
@@ -76,13 +115,11 @@ Page({
   clearCache() {
     wx.showModal({
       title: '确认清除',
-      content: '将清除所有本地缓存的音频文件和临时数据',
+      content: '将清除所有本地缓存的音频文件',
       success: (res) => {
         if (res.confirm) {
-          wx.clearStorageSync()
-          // 恢复默认设置
-          app.globalData.settings = { dailyCount: 20, playMode: 'manual', playSpeed: 1.0 }
-          this.onLoad()
+          audio.clearAllCache()
+          this.updateCacheStats()
           wx.showToast({ title: '缓存已清除', icon: 'success' })
         }
       }

@@ -142,4 +142,7 @@
       </view>
     </view>
   </view>
+
+  <!-- 学习完成庆祝动画 -->
+  <celebration show="{{showCelebration}}" type="both" duration="{{3000}}" bind:complete="onCelebrationComplete" />
 </view>

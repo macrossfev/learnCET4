@@ -1,4 +1,9 @@
 <view class="container" wx:if="{{!loading}}">
+  <!-- 学习日历 -->
+  <view class="card calendar-card">
+    <learning-calendar check-in-records="{{checkInRecords}}" />
+  </view>
+
   <!-- 数字统计卡片 2x2 网格 -->
   <view class="card stats-grid">
     <view class="stat-item">

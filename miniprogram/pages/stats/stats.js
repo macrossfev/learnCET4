@@ -25,7 +25,9 @@ Page({
       totalReviews: 0,
       masteryRate: 0,
       difficultWords: []
-    }
+    },
+    // 打卡记录 { "2026-03-01": { learned: 5, reviewed: 3 }, ... }
+    checkInRecords: {}
   },
 
   _loadStartTime: 0,
@@ -70,6 +72,9 @@ Page({
       // 计算复习统计
       const reviewStats = this._calculateReviewStats(progress.review_queue || [])
 
+      // 构建打卡记录
+      const checkInRecords = this._buildCheckInRecords(progress.review_queue || [], progress.learned_words || [])
+
       this.setData({
         totalLearned,
         streakDays: stats.streak_days || 0,
@@ -83,6 +88,7 @@ Page({
         badges,
         weeklyTrend,
         reviewStats,
+        checkInRecords,
         loading: false
       })
       
@@ -157,7 +163,7 @@ Page({
     if (streakDays >= BADGES.streak30.threshold) {
       badges.push({ icon: BADGES.streak30.icon, name: BADGES.streak30.name, unlocked: true })
     }
-    
+
     // 学习徽章
     if (totalLearned >= BADGES.beginner.threshold) {
       badges.push({ icon: BADGES.beginner.icon, name: BADGES.beginner.name, unlocked: true })
@@ -171,12 +177,53 @@ Page({
     if (totalLearned >= BADGES.thousand.threshold) {
       badges.push({ icon: BADGES.thousand.icon, name: BADGES.thousand.name, unlocked: true })
     }
-    
+
     // 正确率徽章
     if (accuracy === 100 && totalLearned >= 10) {
       badges.push({ icon: BADGES.perfect.icon, name: BADGES.perfect.name, unlocked: true })
     }
-    
+
     return badges.length > 0 ? badges : [{ icon: '🔒', name: '继续学习解锁成就', unlocked: false }]
+  },
+
+  /**
+   * 构建打卡记录对象
+   * 从 review_queue 和 learned_words 中提取每日学习/复习记录
+   */
+  _buildCheckInRecords(reviewQueue, learnedWords) {
+    const records = {}
+    const today = new Date().toISOString().split('T')[0]
+
+    // 从 review_queue 提取学习日期
+    reviewQueue.forEach(item => {
+      const date = item.last_learned
+      if (!date) return
+
+      if (!records[date]) {
+        records[date] = { learned: 0, reviewed: 0 }
+      }
+      records[date].learned++
+
+      // 计算 stage > 0 的为复习次数
+      if (item.stage > 0) {
+        records[date].reviewed++
+      }
+    })
+
+    // 计算每日实际复习次数（通过 review_dates 推算）
+    reviewQueue.forEach(item => {
+      const reviewDates = item.review_dates || []
+      reviewDates.forEach((date, idx) => {
+        // 只有 stage >= idx + 1 才算已完成该次复习
+        if (item.stage > idx) {
+          if (!records[date]) {
+            records[date] = { learned: 0, reviewed: 0 }
+          }
+          records[date].reviewed++
+        }
+      })
+    })
+
+    return records
   }
 })

@@ -1,0 +1,45 @@
+<view class="celebration-container {{visible ? 'visible' : ''}}" bindtap="onTap" wx:if="{{visible}}">
+  <!-- 彩带粒子 -->
+  <view class="confetti-container" wx:if="{{type === 'confetti' || type === 'both'}}">
+    <view
+      class="confetti-particle"
+      wx:for="{{particles}}"
+      wx:key="id"
+      style="
+        left: {{item.x}}%;
+        --start-y: {{item.y}}%;
+        --delay: {{item.delay}}s;
+        --duration: {{item.duration}}s;
+        --rotate: {{item.rotate}}deg;
+        background-color: {{item.color}};
+        width: {{item.size}}rpx;
+        height: {{item.size * 2}}rpx;
+      "
+    ></view>
+  </view>
+
+  <!-- 烟花效果 -->
+  <view class="firework-container" wx:if="{{type === 'firework' || type === 'both'}}">
+    <view class="firework" wx:for="{{fireworks}}" wx:key="id" style="left: {{item.x}}%; top: {{item.y}}%;">
+      <view
+        class="firework-particle"
+        wx:for="{{item.particles}}"
+        wx:for-item="p"
+        wx:for-index="pi"
+        wx:key="angle"
+        style="
+          --angle: {{p.angle}}deg;
+          --distance: {{p.distance}}rpx;
+          background-color: {{item.color}};
+        "
+      ></view>
+    </view>
+  </view>
+
+  <!-- 完成提示 -->
+  <view class="completion-message">
+    <text class="completion-icon">🎉</text>
+    <text class="completion-text">学习完成！</text>
+    <text class="completion-hint">点击任意位置关闭</text>
+  </view>
+</view>

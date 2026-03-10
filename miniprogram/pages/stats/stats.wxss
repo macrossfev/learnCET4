@@ -4,6 +4,12 @@
   background: linear-gradient(180deg, #E8EDF5 0%, #F0F2F7 40%, #F0F2F7 100%);
 }
 
+/* 日历卡片 */
+.calendar-card {
+  padding: 0;
+  overflow: hidden;
+}
+
 /* 统计网格 2x2 */
 .stats-grid {
   display: flex;

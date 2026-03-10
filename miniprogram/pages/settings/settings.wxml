@@ -52,14 +52,23 @@
   <view class="section-title">数据管理</view>
   <view class="card settings-group">
     <view class="setting-item flex-between">
-      <text class="setting-label">缓存大小</text>
-      <text class="setting-info">{{cacheSize}}</text>
+      <view class="cache-info">
+        <text class="setting-label">音频缓存</text>
+        <text class="cache-detail">{{cacheCount}} 个文件，共 {{cacheSize}}</text>
+      </view>
+    </view>
+
+    <view class="cache-progress">
+      <view class="cache-progress-bar">
+        <view class="cache-progress-fill" style="width: {{cachePercent}}%;"></view>
+      </view>
+      <text class="cache-percent">{{cachePercent}}%</text>
     </view>
 
     <view class="divider"></view>
 
     <view class="setting-item flex-between" bindtap="clearCache">
-      <text class="setting-label danger-color">清除本地缓存</text>
+      <text class="setting-label danger-color">清除音频缓存</text>
       <text class="arrow">></text>
     </view>
 

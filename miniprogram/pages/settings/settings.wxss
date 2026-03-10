@@ -55,3 +55,45 @@
   background: linear-gradient(90deg, transparent, rgba(180, 195, 220, 0.4), transparent);
   margin: 0 30rpx;
 }
+
+/* 缓存信息 */
+.cache-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.cache-detail {
+  font-size: 24rpx;
+  color: #8494A7;
+  margin-top: 4rpx;
+}
+
+/* 缓存进度条 */
+.cache-progress {
+  display: flex;
+  align-items: center;
+  padding: 0 30rpx 20rpx;
+  gap: 16rpx;
+}
+
+.cache-progress-bar {
+  flex: 1;
+  height: 8rpx;
+  background: linear-gradient(180deg, #E8EDF5, #D8DEE8);
+  border-radius: 4rpx;
+  overflow: hidden;
+}
+
+.cache-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #2B5EA7, #5A9AD9);
+  border-radius: 4rpx;
+  transition: width 0.3s ease;
+}
+
+.cache-percent {
+  font-size: 22rpx;
+  color: #8494A7;
+  min-width: 50rpx;
+  text-align: right;
+}

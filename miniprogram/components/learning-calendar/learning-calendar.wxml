@@ -1,0 +1,56 @@
+<view class="calendar-container">
+  <!-- 月份导航 -->
+  <view class="calendar-header">
+    <view class="nav-btn" bindtap="prevMonth">
+      <text class="nav-icon">‹</text>
+    </view>
+    <text class="month-title">{{currentYear}}年{{currentMonth}}月</text>
+    <view class="nav-btn" bindtap="nextMonth">
+      <text class="nav-icon">›</text>
+    </view>
+  </view>
+
+  <!-- 星期标题 -->
+  <view class="week-header">
+    <text class="week-day" wx:for="{{weekDays}}" wx:key="*this">{{item}}</text>
+  </view>
+
+  <!-- 日历网格 -->
+  <view class="calendar-grid">
+    <view
+      class="day-cell {{item.empty ? 'empty' : ''}} {{item.isToday ? 'today' : ''}} {{item.checked ? 'checked' : ''}} {{item.status}}"
+      wx:for="{{calendarDays}}"
+      wx:key="dateStr"
+      data-datestr="{{item.dateStr}}"
+      data-checked="{{item.checked}}"
+      data-learned="{{item.learned}}"
+      data-reviewed="{{item.reviewed}}"
+      bindtap="onTapDay"
+    >
+      <text class="day-number" wx:if="{{!item.empty}}">{{item.day}}</text>
+      <view class="check-mark" wx:if="{{item.checked && !item.empty}}">
+        <text class="check-dot"></text>
+      </view>
+      <view class="day-stats" wx:if="{{item.checked && !item.empty && (item.learned > 0 || item.reviewed > 0)}}">
+        <text class="stat-num" wx:if="{{item.learned > 0}}">{{item.learned}}</text>
+        <text class="stat-num review" wx:if="{{item.reviewed > 0}}">+{{item.reviewed}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 图例 -->
+  <view class="calendar-legend">
+    <view class="legend-item">
+      <view class="legend-dot learned"></view>
+      <text>学习</text>
+    </view>
+    <view class="legend-item">
+      <view class="legend-dot reviewed"></view>
+      <text>复习</text>
+    </view>
+    <view class="legend-item">
+      <view class="legend-dot both"></view>
+      <text>学习+复习</text>
+    </view>
+  </view>
+</view>

@@ -2,6 +2,7 @@ const db = require('../../utils/db')
 const audio = require('../../utils/audio')
 const review = require('../../utils/review')
 const constants = require('../../utils/constants')
+const tracker = require('../../utils/tracker')
 
 Page({
   data: {
@@ -19,13 +20,15 @@ Page({
     spellInput: '',
     spellCorrect: false,
     quizPassed: false,
-    showQuizNotice: false
+    showQuizNotice: false,
+    showCelebration: false
   },
 
   _touchStartX: 0,
   _touchStartY: 0,
   _autoSaveTimer: null,
   _loadStartTime: 0,
+  _learnStartTime: 0,  // 学习开始时间
   
   // 鼓励语录
   _encouragements: [
@@ -39,12 +42,16 @@ Page({
 
   onLoad(options) {
     this._loadStartTime = Date.now()
+    this._learnStartTime = Date.now()
     const unit = parseInt(options.unit) || 1
     const settings = getApp().globalData.settings
     const isContinuousMode = settings.playMode === 'continuous'
     this.setData({ unit, isContinuousMode })
     this._checkInterruptedProgress()
     this._startAutoSave()
+
+    // 埋点：页面访问
+    tracker.trackPageView('learn')
   },
 
   _checkInterruptedProgress() {
@@ -155,6 +162,9 @@ Page({
         phase: 'learn'
       })
       wx.hideLoading()
+
+      // 埋点：开始学习
+      tracker.trackLearnStart(unit, unlearnedWords.length)
     } catch (err) {
       wx.hideLoading()
       console.error('加载单词失败', err)
@@ -223,9 +233,14 @@ Page({
   // Skip quiz and mark for review
   skipQuiz() {
     this.hideQuizNotice()
+    const { words, currentIndex } = this.data
+    const currentWord = words[currentIndex]
+
+    // 埋点：跳过测试
+    tracker.trackQuizSkip(currentWord.word)
+
     wx.showToast({ title: '已加入复习', icon: 'none' })
     // Move to next word or finish
-    const { currentIndex, words } = this.data
     if (currentIndex >= words.length - 1) {
       this.onAllDone()
     } else {
@@ -251,6 +266,9 @@ Page({
       spellCorrect: false,
       quizPassed: false
     })
+
+    // 埋点：开始测试
+    tracker.trackQuizStart(currentWord.word)
   },
 
   _generateChoices(currentWord, allWords) {
@@ -285,8 +303,12 @@ Page({
       choiceCorrect: correct
     })
 
+    const currentWord = this.data.words[this.data.currentIndex]
+
+    // 埋点：选择题答题
+    tracker.trackQuizChoice(currentWord.word, correct, option.meaning)
+
     if (!correct) {
-      const currentWord = this.data.words[this.data.currentIndex]
       this._saveError(currentWord, 'choice', option.meaning, currentWord.meaning)
       // 显示鼓励语
       this._showEncouragement()
@@ -327,6 +349,9 @@ Page({
       phase: 'result',
       quizPassed
     })
+
+    // 埋点：默写答题
+    tracker.trackQuizSpell(currentWord.word, isCorrect, input)
 
     if (!isCorrect) {
       this._saveError(currentWord, 'spell', input, expected)
@@ -416,7 +441,10 @@ Page({
   async onAllDone() {
     this.setData({ allDone: true })
 
-    const { progress, unit } = this.data
+    // 计算学习时长
+    const duration = Math.round((Date.now() - this._learnStartTime) / 1000)
+
+    const { progress, unit, todayLearned } = this.data
     if (progress) {
       try {
         const today = review.getToday()
@@ -435,6 +463,23 @@ Page({
       }
     }
 
+    // 埋点：学习完成
+    tracker.trackLearnComplete(unit, todayLearned.length, duration)
+
+    // 如果有学习新词，显示庆祝动画
+    if (todayLearned.length > 0) {
+      this.setData({ showCelebration: true })
+    } else {
+      this._showCompletionModal()
+    }
+  },
+
+  onCelebrationComplete() {
+    this.setData({ showCelebration: false })
+    this._showCompletionModal()
+  },
+
+  _showCompletionModal() {
     wx.showModal({
       title: '学习完成',
       content: '本单元学习结束，共掌握 ' + this.data.todayLearned.length + ' 个新词。',

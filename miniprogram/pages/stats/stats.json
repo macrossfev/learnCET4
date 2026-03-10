@@ -1,6 +1,7 @@
 {
   "usingComponents": {
-    "progress-bar": "/components/progress-bar/progress-bar"
+    "progress-bar": "/components/progress-bar/progress-bar",
+    "learning-calendar": "/components/learning-calendar/learning-calendar"
   },
   "navigationBarTitleText": "学习统计"
 }
