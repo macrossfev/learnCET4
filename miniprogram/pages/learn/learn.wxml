@@ -1,13 +1,8 @@
-<view class="container"
-  bindtouchstart="onTouchStart"
-  bindtouchend="onTouchEnd"
->
+<view class="container" bindtouchstart="onTouchStart" bindtouchend="onTouchEnd">
   <!-- 顶部进度 -->
   <view class="top-bar">
     <text class="progress-text">{{currentIndex + 1}} / {{words.length}}</text>
-    <view class="mode-tag" wx:if="{{isContinuousMode}}">
-      <text class="mode-text">连续播放</text>
-    </view>
+    <text class="step-indicator">步骤 {{step}}/3</text>
   </view>
 
   <!-- 进度条 -->
@@ -15,89 +10,75 @@
     <view class="learn-progress-fill" style="width: {{words.length > 0 ? (currentIndex + 1) / words.length * 100 : 0}}%;"></view>
   </view>
 
-  <!-- 学习阶段：单词卡片 -->
-  <view class="card-area" wx:if="{{words.length > 0 && !allDone && phase === 'learn'}}">
-    <word-card
-      id="wordCard"
-      word="{{words[currentIndex]}}"
-      autoShowDetail="{{true}}"
-      bind:sequenceComplete="onSequenceComplete"
-    />
+  <!-- ===== 步骤1：单词展示 ===== -->
+  <view class="card-area" wx:if="{{words.length > 0 && !allDone && step === 1}}">
+    <view class="word-display">
+      <text class="word-text">{{words[currentIndex].word}}</text>
+      <text class="word-phonetic">{{words[currentIndex].phonetic}}</text>
+      <view class="word-meaning-box">
+        <text class="word-meaning">{{words[currentIndex].meaning}}</text>
+      </view>
+
+      <view class="word-section" wx:if="{{words[currentIndex].phrase}}">
+        <text class="section-label">词组</text>
+        <text class="section-en">{{words[currentIndex].phrase}}</text>
+        <text class="section-cn">{{words[currentIndex].phrase_meaning}}</text>
+      </view>
+
+      <view class="word-section" wx:if="{{words[currentIndex].example}}">
+        <text class="section-label">例句</text>
+        <text class="section-en">{{words[currentIndex].example}}</text>
+        <text class="section-cn">{{words[currentIndex].example_meaning}}</text>
+      </view>
+    </view>
+
     <view class="swipe-hint">
-      <text class="swipe-hint-text">左滑上一词 / 右滑下一词</text>
+      <text class="swipe-hint-text">右滑进入测试 →</text>
     </view>
   </view>
 
-  <!-- 选择题阶段 -->
-  <view class="quiz-area" wx:if="{{phase === 'choice'}}">
+  <!-- ===== 步骤2：选择题 ===== -->
+  <view class="quiz-area" wx:if="{{step === 2 && words.length > 0}}">
     <view class="quiz-card">
       <text class="quiz-word">{{words[currentIndex].word}}</text>
       <text class="quiz-phonetic">{{words[currentIndex].phonetic}}</text>
       <text class="quiz-prompt">请选择正确的中文含义</text>
+
       <view class="choice-list">
-        <view wx:for="{{choiceOptions}}" wx:key="index"
-          class="choice-item {{choiceSelected >= 0 ? (item.correct ? 'choice-correct' : (choiceSelected == index ? 'choice-wrong' : 'choice-dim')) : ''}}"
-          data-index="{{index}}"
-          bind:tap="onChoiceSelect"
-        >
+        <view wx:for="{{choiceOptions}}" wx:key="index" class="choice-item {{choiceSelected === index ? (item.correct ? 'choice-correct' : 'choice-wrong') : ''}}" data-index="{{index}}" bind:tap="onChoiceSelect">
           <text class="choice-letter">{{['A','B','C','D'][index]}}</text>
           <text class="choice-text">{{item.meaning}}</text>
         </view>
       </view>
+
+      <view class="choice-feedback" wx:if="{{choiceWrong}}">
+        <text class="feedback-text">答案错误，请重试</text>
+      </view>
+    </view>
+
+    <view class="swipe-hint">
+      <text class="swipe-hint-text">← 左滑返回 | 右滑跳过 →</text>
     </view>
   </view>
 
-  <!-- 默写阶段 -->
-  <view class="quiz-area" wx:if="{{phase === 'spell'}}">
+  <!-- ===== 步骤3：填词 ===== -->
+  <view class="quiz-area" wx:if="{{step === 3 && words.length > 0}}">
     <view class="quiz-card">
       <text class="quiz-meaning-large">{{words[currentIndex].meaning}}</text>
       <text class="quiz-prompt">请输入对应的英文单词</text>
-      <input class="spell-input"
-        value="{{spellInput}}"
-        bindinput="onSpellInput"
-        bindconfirm="onSpellSubmit"
-        focus="{{phase === 'spell'}}"
-        placeholder="输入单词..."
-        adjust-position="{{true}}"
-      />
+
+      <input class="spell-input {{spellWrong ? 'spell-wrong' : ''}}" value="{{spellInput}}" bindinput="onSpellInput" bindconfirm="onSpellSubmit" focus="{{step === 3}}" placeholder="输入单词..." adjust-position="{{true}}" />
+
+      <view class="spell-hint" wx:if="{{spellHint}}">
+        <text>{{spellHint}}</text>
+      </view>
+
       <button class="btn btn-primary spell-submit-btn" bind:tap="onSpellSubmit">确认</button>
     </view>
-  </view>
 
-  <!-- 结果阶段 -->
-  <view class="quiz-area" wx:if="{{phase === 'result'}}">
-    <view class="quiz-card">
-      <view class="result-header {{quizPassed ? 'result-pass' : 'result-fail'}}">
-        <text class="result-icon">{{quizPassed ? '✓' : '✗'}}</text>
-        <text class="result-title">{{quizPassed ? '全部正确，已掌握！' : '答题有误，继续加油'}}</text>
-      </view>
-
-      <view class="result-word-info">
-        <text class="result-word">{{words[currentIndex].word}}</text>
-        <text class="result-meaning">{{words[currentIndex].meaning}}</text>
-      </view>
-
-      <view class="result-item" wx:if="{{!choiceCorrect}}">
-        <text class="result-label">选择题答错</text>
-        <text class="result-detail">你的选择：{{choiceOptions[choiceSelected].meaning}}</text>
-        <text class="result-detail result-correct">正确答案：{{words[currentIndex].meaning}}</text>
-      </view>
-
-      <view class="result-item" wx:if="{{!spellCorrect}}">
-        <text class="result-label">默写答错</text>
-        <text class="result-detail">你的输入：{{spellInput || '(空)'}}</text>
-        <text class="result-detail result-correct">正确拼写：{{words[currentIndex].word}}</text>
-      </view>
-
-      <button class="btn btn-primary result-next-btn" bind:tap="goNextAfterQuiz">
-        {{currentIndex >= words.length - 1 ? '完成学习' : '下一词'}}
-      </button>
+    <view class="swipe-hint">
+      <text class="swipe-hint-text">← 左滑返回选择题</text>
     </view>
-  </view>
-
-  <!-- 空状态 -->
-  <view class="empty-state" wx:if="{{words.length === 0 && !allDone}}">
-    <text class="empty-text">暂无可学单词</text>
   </view>
 
   <!-- 完成状态 -->
@@ -107,40 +88,11 @@
     <text class="done-sub">本单元已全部掌握</text>
   </view>
 
-  <!-- 底部操作栏（仅学习阶段） -->
-  <view class="bottom-bar" wx:if="{{words.length > 0 && !allDone && phase === 'learn'}}">
-    <button
-      class="btn btn-gray btn-action"
-      disabled="{{currentIndex <= 0}}"
-      bind:tap="prevWord"
-    >上一词</button>
-
-    <button
-      class="btn btn-primary btn-action btn-quiz"
-      bind:tap="showQuizNotice"
-    >开始测试</button>
-
-    <button
-      class="btn btn-gray btn-action"
-      disabled="{{currentIndex >= words.length - 1}}"
-      bind:tap="nextWord"
-    >下一词</button>
-  </view>
-
-  <!-- 测试前提示弹窗 -->
-  <view class="quiz-notice-modal" wx:if="{{showQuizNotice}}">
-    <view class="modal-mask" bind:tap="hideQuizNotice"></view>
-    <view class="modal-content">
-      <view class="modal-icon">📝</view>
-      <view class="modal-title">学完测试时间</view>
-      <view class="modal-word">{{words[currentIndex].word}}</view>
-      <view class="modal-phonetic" wx:if="{{words[currentIndex].phonetic}}">{{words[currentIndex].phonetic}}</view>
-      <view class="modal-hint">准备好了吗？</view>
-      <view class="modal-buttons">
-        <button class="modal-btn modal-btn-skip" bind:tap="skipQuiz">跳过</button>
-        <button class="modal-btn modal-btn-start" bind:tap="startQuiz">开始测试</button>
-      </view>
-    </view>
+  <!-- 底部操作栏 -->
+  <view class="bottom-bar" wx:if="{{words.length > 0 && !allDone}}">
+    <button class="btn btn-gray btn-action" disabled="{{currentIndex <= 0}}" bind:tap="onPrevWord">上一词</button>
+    <button class="btn btn-warning btn-action" bind:tap="onMarkUnfamiliar">不熟</button>
+    <button class="btn btn-primary btn-action" bind:tap="onNextWord">{{step < 3 ? '请先完成测试' : '下一词'}}</button>
   </view>
 
   <!-- 学习完成庆祝动画 -->

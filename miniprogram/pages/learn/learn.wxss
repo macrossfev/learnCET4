@@ -23,27 +23,21 @@
   color: transparent;
 }
 
-.mode-tag {
-  background: linear-gradient(135deg, rgba(54, 116, 184, 0.12), rgba(54, 116, 184, 0.06));
-  border: 1rpx solid rgba(54, 116, 184, 0.2);
+.step-indicator {
+  font-size: 24rpx;
+  color: #8494A7;
+  background: rgba(43, 94, 167, 0.08);
+  padding: 6rpx 16rpx;
   border-radius: 16rpx;
-  padding: 4rpx 16rpx;
 }
 
-.mode-text {
-  font-size: 22rpx;
-  color: #2B5EA7;
-  font-weight: 500;
-}
-
-/* 学习进度条 - 钢蓝金属 */
+/* 学习进度条 */
 .learn-progress-bar {
   height: 8rpx;
   background: linear-gradient(180deg, #D8DEE8, #CDD4E0);
   border-radius: 4rpx;
   overflow: hidden;
   margin-bottom: 30rpx;
-  box-shadow: inset 0 1rpx 2rpx rgba(0, 0, 0, 0.06);
 }
 
 .learn-progress-fill {
@@ -51,7 +45,6 @@
   background: linear-gradient(90deg, #3674B8, #5A9AD9, #3674B8);
   border-radius: 4rpx;
   transition: width 0.3s ease;
-  box-shadow: 0 1rpx 3rpx rgba(54, 116, 184, 0.4);
 }
 
 /* 卡片区域 */
@@ -63,27 +56,80 @@
   padding: 0 0 200rpx;
 }
 
+/* 单词展示 */
+.word-display {
+  background: linear-gradient(180deg, #FFFFFF 0%, #F7F8FC 100%);
+  border-radius: 20rpx;
+  padding: 40rpx 36rpx;
+  box-shadow: 0 4rpx 16rpx rgba(30, 60, 110, 0.08);
+  border: 1rpx solid rgba(180, 195, 220, 0.35);
+}
+
+.word-text {
+  display: block;
+  text-align: center;
+  font-size: 64rpx;
+  font-weight: 700;
+  color: #1a2a3a;
+  margin-bottom: 8rpx;
+}
+
+.word-phonetic {
+  display: block;
+  text-align: center;
+  font-size: 28rpx;
+  color: #8494A7;
+  margin-bottom: 24rpx;
+}
+
+.word-meaning-box {
+  text-align: center;
+  padding: 20rpx 0;
+  border-top: 1rpx solid rgba(180, 195, 220, 0.3);
+  border-bottom: 1rpx solid rgba(180, 195, 220, 0.3);
+  margin-bottom: 24rpx;
+}
+
+.word-meaning {
+  font-size: 36rpx;
+  color: #2B5EA7;
+  font-weight: 500;
+}
+
+.word-section {
+  margin-top: 24rpx;
+}
+
+.section-label {
+  display: block;
+  font-size: 24rpx;
+  color: #8494A7;
+  margin-bottom: 8rpx;
+}
+
+.section-en {
+  display: block;
+  font-size: 28rpx;
+  color: #1a2a3a;
+  margin-bottom: 4rpx;
+  line-height: 1.5;
+}
+
+.section-cn {
+  display: block;
+  font-size: 26rpx;
+  color: #6B7B8D;
+  line-height: 1.5;
+}
+
 .swipe-hint {
   text-align: center;
   padding: 20rpx 0;
 }
 
 .swipe-hint-text {
-  font-size: 22rpx;
+  font-size: 24rpx;
   color: #B0C4DE;
-}
-
-/* 空状态 */
-.empty-state {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.empty-text {
-  font-size: 32rpx;
-  color: #8494A7;
 }
 
 /* 完成状态 */
@@ -114,7 +160,7 @@
   color: #8494A7;
 }
 
-/* 底部操作栏 - 金属面板 */
+/* 底部操作栏 */
 .bottom-bar {
   position: fixed;
   bottom: 0;
@@ -135,31 +181,32 @@
   margin: 0 10rpx;
   height: 80rpx;
   border-radius: 40rpx;
-  font-size: 30rpx;
+  font-size: 28rpx;
 }
 
-.btn-quiz {
-  flex: 1.3;
+.btn-warning {
+  background: linear-gradient(135deg, #D4860B, #E6A020);
+  color: #FFFFFF;
 }
 
 .btn-action[disabled] {
   opacity: 0.4;
 }
 
-/* ========== 测试阶段 - 金属质感 ========== */
+/* 测试阶段 */
 .quiz-area {
   flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 0 0 60rpx;
+  padding: 0 0 200rpx;
 }
 
 .quiz-card {
   background: linear-gradient(180deg, #FFFFFF 0%, #F7F8FC 100%);
   border-radius: 20rpx;
   padding: 48rpx 36rpx;
-  box-shadow: 0 4rpx 16rpx rgba(30, 60, 110, 0.08), 0 1rpx 3rpx rgba(30, 60, 110, 0.05);
+  box-shadow: 0 4rpx 16rpx rgba(30, 60, 110, 0.08);
   border: 1rpx solid rgba(180, 195, 220, 0.35);
 }
 
@@ -197,7 +244,7 @@
   margin-bottom: 36rpx;
 }
 
-/* 选择题 - 金属面板选项 */
+/* 选择题 */
 .choice-list {
   display: flex;
   flex-direction: column;
@@ -211,11 +258,6 @@
   background: linear-gradient(180deg, #F8F9FC, #F0F2F7);
   border-radius: 12rpx;
   border: 2rpx solid rgba(180, 195, 220, 0.3);
-  transition: all 0.2s;
-}
-
-.choice-item:active {
-  background: linear-gradient(180deg, #EDF1F8, #E4E9F2);
 }
 
 .choice-letter {
@@ -250,11 +292,17 @@
   color: #C62828;
 }
 
-.choice-dim {
-  opacity: 0.5;
+.choice-feedback {
+  text-align: center;
+  margin-top: 20rpx;
 }
 
-/* 默写输入 - 金属边框 */
+.feedback-text {
+  font-size: 28rpx;
+  color: #C62828;
+}
+
+/* 填词输入 */
 .spell-input {
   width: 100%;
   height: 88rpx;
@@ -263,184 +311,26 @@
   padding: 0 24rpx;
   font-size: 32rpx;
   color: #1a2a3a;
-  margin-bottom: 32rpx;
+  margin-bottom: 16rpx;
   box-sizing: border-box;
   background: linear-gradient(180deg, #FFFFFF, #FAFBFD);
 }
 
+.spell-input.spell-wrong {
+  border-color: #C62828;
+  background: linear-gradient(180deg, #FFF5F5, #FFF0F0);
+}
+
+.spell-hint {
+  text-align: center;
+  margin-bottom: 16rpx;
+}
+
+.spell-hint text {
+  font-size: 26rpx;
+  color: #C62828;
+}
+
 .spell-submit-btn {
   margin-top: 10rpx;
-}
-
-/* 测试结果 - 金属面板 */
-.result-header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24rpx 0 32rpx;
-  border-bottom: 1rpx solid rgba(180, 195, 220, 0.3);
-  margin-bottom: 28rpx;
-}
-
-.result-icon {
-  font-size: 48rpx;
-  margin-right: 16rpx;
-}
-
-.result-title {
-  font-size: 32rpx;
-  font-weight: 600;
-}
-
-.result-pass {
-  color: #1A8A5C;
-}
-
-.result-fail {
-  color: #C62828;
-}
-
-.result-word-info {
-  text-align: center;
-  margin-bottom: 28rpx;
-}
-
-.result-word {
-  display: block;
-  font-size: 44rpx;
-  font-weight: 700;
-  color: #1a2a3a;
-  margin-bottom: 8rpx;
-}
-
-.result-meaning {
-  display: block;
-  font-size: 28rpx;
-  color: #6B7B8D;
-}
-
-.result-item {
-  background: linear-gradient(180deg, #FFF6EE, #FFF0E0);
-  border-radius: 12rpx;
-  padding: 20rpx 24rpx;
-  margin-bottom: 16rpx;
-  border: 1rpx solid rgba(212, 134, 11, 0.15);
-}
-
-.result-label {
-  display: block;
-  font-size: 26rpx;
-  font-weight: 600;
-  color: #C62828;
-  margin-bottom: 8rpx;
-}
-
-.result-detail {
-  display: block;
-  font-size: 26rpx;
-  color: #4A5568;
-  line-height: 1.6;
-}
-
-.result-correct {
-  color: #1A8A5C;
-  font-weight: 500;
-}
-
-.result-next-btn {
-  margin-top: 36rpx;
-}
-
-/* ========== 测试前提示弹窗 ========== */
-.quiz-notice-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.modal-mask {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-}
-
-.modal-content {
-  position: relative;
-  background: linear-gradient(180deg, #FFFFFF 0%, #F7F8FC 100%);
-  border-radius: 24rpx;
-  padding: 48rpx 36rpx;
-  width: 80%;
-  max-width: 600rpx;
-  box-shadow: 0 8rpx 32rpx rgba(30, 60, 110, 0.15);
-  border: 1rpx solid rgba(180, 195, 220, 0.4);
-  text-align: center;
-}
-
-.modal-icon {
-  font-size: 80rpx;
-  margin-bottom: 16rpx;
-}
-
-.modal-title {
-  font-size: 36rpx;
-  font-weight: 700;
-  color: #1a2a3a;
-  margin-bottom: 24rpx;
-}
-
-.modal-word {
-  font-size: 48rpx;
-  font-weight: 700;
-  color: #2B5EA7;
-  margin-bottom: 8rpx;
-}
-
-.modal-phonetic {
-  font-size: 28rpx;
-  color: #8494A7;
-  margin-bottom: 24rpx;
-}
-
-.modal-hint {
-  font-size: 28rpx;
-  color: #6B7B8D;
-  margin-bottom: 36rpx;
-}
-
-.modal-buttons {
-  display: flex;
-  gap: 20rpx;
-}
-
-.modal-btn {
-  flex: 1;
-  height: 80rpx;
-  line-height: 80rpx;
-  border-radius: 40rpx;
-  font-size: 30rpx;
-  font-weight: 600;
-  border: none;
-}
-
-.modal-btn::after {
-  border: none;
-}
-
-.modal-btn-skip {
-  background: linear-gradient(180deg, #F0F2F7, #E4E9F0);
-  color: #6B7B8D;
-}
-
-.modal-btn-start {
-  background: linear-gradient(135deg, #2B5EA7, #3674B8);
-  color: #fff;
 }

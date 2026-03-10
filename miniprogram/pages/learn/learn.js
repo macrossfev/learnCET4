@@ -11,95 +11,56 @@ Page({
     progress: null,
     todayLearned: [],
     unit: 1,
-    isContinuousMode: false,
     allDone: false,
-    phase: 'learn',
+    // 当前步骤：1=单词展示, 2=选择题, 3=填词
+    step: 1,
+    // 选择题
     choiceOptions: [],
     choiceSelected: -1,
     choiceCorrect: false,
+    choiceWrong: false,
+    // 填词
     spellInput: '',
-    spellCorrect: false,
-    quizPassed: false,
-    showQuizNotice: false,
-    showCelebration: false
+    spellWrong: false,
+    spellHint: '',
+    // 重点记忆集合
+    focusWords: []
   },
 
   _touchStartX: 0,
   _touchStartY: 0,
   _autoSaveTimer: null,
   _loadStartTime: 0,
-  _learnStartTime: 0,  // 学习开始时间
-  
-  // 鼓励语录
-  _encouragements: [
-    '没关系，下次一定行！💪',
-    '这个确实容易错，加油！👍',
-    '记住正确答案了就学会了！📚',
-    '错误是学习的机会！🌟',
-    '又学会一个词，进步了！🎉',
-    '坚持就是胜利！🏆'
-  ],
+  _learnStartTime: 0,
 
   onLoad(options) {
     this._loadStartTime = Date.now()
     this._learnStartTime = Date.now()
     const unit = parseInt(options.unit) || 1
-    const settings = getApp().globalData.settings
-    const isContinuousMode = settings.playMode === 'continuous'
-    this.setData({ unit, isContinuousMode })
-    this._checkInterruptedProgress()
+    this.setData({ unit })
+    this.loadWords(unit)
     this._startAutoSave()
 
-    // 埋点：页面访问
+    // 加载重点记忆集合
+    const focusWords = wx.getStorageSync('focus_words') || []
+    this.setData({ focusWords })
+
     tracking.trackPageView('learn')
   },
 
-  _checkInterruptedProgress() {
-    const tempProgress = wx.getStorageSync('temp_learning_progress')
-    if (tempProgress && tempProgress.unit === this.data.unit) {
-      const now = Date.now()
-      const diff = now - tempProgress.timestamp
-      
-      if (diff < constants.RECOVER_TIMEOUT && tempProgress.currentIndex > 0) {
-        wx.showModal({
-          title: '恢复学习',
-          content: `检测到未完成的学习，是否从第 ${tempProgress.currentIndex + 1} 词继续？`,
-          success: (res) => {
-            if (res.confirm) {
-              this.setData({ currentIndex: tempProgress.currentIndex, phase: 'learn' })
-              this.loadWords(this.data.unit, true)
-            } else {
-              this.loadWords(this.data.unit, false)
-            }
-          }
-        })
-        return
-      }
-    }
-    this.loadWords(this.data.unit, false)
+  onUnload() {
+    audio.stop()
+    this._clearAutoSave()
+  },
+
+  onHide() {
+    this._saveProgress()
   },
 
   _startAutoSave() {
     this._autoSaveTimer = setInterval(() => {
       this._saveProgress()
     }, constants.AUTO_SAVE_INTERVAL)
-  },
-
-  _recordLoadTime() {
-    const loadTime = Date.now() - this._loadStartTime
-    if (loadTime > 3000) {
-      console.warn('页面加载过慢:', loadTime, 'ms')
-    }
-  },
-
-  onUnload() {
-    audio.stop()
-    this._clearAutoSave()
-    this._recordLoadTime()
-  },
-
-  onHide() {
-    this._saveProgress()
   },
 
   _clearAutoSave() {
@@ -109,18 +70,10 @@ Page({
     }
   },
 
-  async loadWords(unit, skipRestore = false) {
+  async loadWords(unit) {
     try {
       wx.showLoading({ title: '加载中...' })
-      const settings = getApp().globalData.settings
-      let dailyCount = settings.dailyCount
-      
-      // 首个单元减半，降低初学者压力
-      const isFirstUnit = unit === 1
-      if (isFirstUnit) {
-        dailyCount = 10
-      }
-      
+      const dailyCount = constants.DEFAULT_DAILY_COUNT
       const { startRank, endRank } = review.getUnitRange(unit, dailyCount)
 
       const level = 'CET4'
@@ -150,20 +103,23 @@ Page({
         return
       }
 
-      // If restoring, use saved index, otherwise start from 0
-      const startIndex = skipRestore ? this.data.currentIndex : 0
-      
       this.setData({
         words: unlearnedWords,
-        currentIndex: startIndex,
+        currentIndex: 0,
         progress,
         todayLearned: [],
         allDone: false,
-        phase: 'learn'
+        step: 1,
+        choiceSelected: -1,
+        choiceCorrect: false,
+        spellInput: '',
+        spellWrong: false
       })
       wx.hideLoading()
 
-      // 埋点：开始学习
+      // 播放当前单词音频
+      this._playCurrentWordAudio()
+
       tracking.trackLearnStart(unit, unlearnedWords.length)
     } catch (err) {
       wx.hideLoading()
@@ -172,108 +128,81 @@ Page({
     }
   },
 
-  // Save progress for interruption recovery
   _saveProgress() {
     const { unit, currentIndex, todayLearned } = this.data
-    const tempProgress = {
+    wx.setStorageSync('temp_learning_progress', {
       unit,
       currentIndex,
       todayLearnedCount: todayLearned.length,
       timestamp: Date.now()
-    }
-    wx.setStorageSync('temp_learning_progress', tempProgress)
+    })
   },
 
-  // Swipe handlers
+  // 播放当前单词音频
+  _playCurrentWordAudio() {
+    const { words, currentIndex, step } = this.data
+    if (!words[currentIndex]) return
+
+    const word = words[currentIndex]
+    if (step === 1 && word.audio) {
+      audio.playWordSequence(word.audio)
+    }
+  },
+
+  // ===== 滑动处理（页面间切换）=====
   onTouchStart(e) {
     this._touchStartX = e.touches[0].clientX
     this._touchStartY = e.touches[0].clientY
   },
 
   onTouchEnd(e) {
-    if (this.data.phase !== 'learn') return
     const deltaX = e.changedTouches[0].clientX - this._touchStartX
     const deltaY = e.changedTouches[0].clientY - this._touchStartY
     if (Math.abs(deltaX) < 60 || Math.abs(deltaX) < Math.abs(deltaY)) return
 
-    if (deltaX < 0) {
-      // 向左划 → 上一词
-      this.prevWord()
+    if (deltaX > 0) {
+      // 右滑 → 下一页（step+1）
+      this.nextStep()
     } else {
-      // 向右划 → 下一词
-      this.nextWord()
+      // 左滑 → 上一页（step-1）
+      this.prevStep()
     }
   },
 
-  prevWord() {
-    if (this.data.currentIndex <= 0) {
-      wx.showToast({ title: '已是第一个', icon: 'none' })
-      return
+  prevStep() {
+    const { step } = this.data
+    if (step > 1) {
+      this.setData({ step: step - 1, spellInput: '', spellWrong: false, choiceSelected: -1, choiceWrong: false })
     }
-    audio.stop()
-    this.setData({ currentIndex: this.data.currentIndex - 1, phase: 'learn' })
   },
 
-  nextWord() {
-    const { currentIndex, words } = this.data
-    if (currentIndex >= words.length - 1) return
-    audio.stop()
-    this.setData({ currentIndex: currentIndex + 1, phase: 'learn' })
-  },
-
-  // Show quiz notice modal
-  showQuizNotice() {
-    this.setData({ showQuizNotice: true })
-  },
-
-  hideQuizNotice() {
-    this.setData({ showQuizNotice: false })
-  },
-
-  // Skip quiz and mark for review
-  skipQuiz() {
-    this.hideQuizNotice()
-    const { words, currentIndex } = this.data
-    const currentWord = words[currentIndex]
-
-    // 埋点：跳过测试
-    tracking.trackQuizSkip(currentWord.word)
-
-    wx.showToast({ title: '已加入复习', icon: 'none' })
-    // Move to next word or finish
-    if (currentIndex >= words.length - 1) {
-      this.onAllDone()
-    } else {
+  nextStep() {
+    const { step } = this.data
+    if (step < 3) {
+      // 进入下一步前准备
+      if (step === 1) {
+        // 进入选择题
+        this._prepareChoice()
+      }
       audio.stop()
-      this.setData({ currentIndex: currentIndex + 1, phase: 'learn' })
+      this.setData({ step: step + 1, spellInput: '', spellWrong: false })
     }
   },
 
-  // Start quiz for current word
-  startQuiz() {
-    this.hideQuizNotice()
-    audio.stop()
+  _prepareChoice() {
     const { words, currentIndex } = this.data
     const currentWord = words[currentIndex]
     const options = this._generateChoices(currentWord, words)
-
     this.setData({
-      phase: 'choice',
       choiceOptions: options,
       choiceSelected: -1,
       choiceCorrect: false,
-      spellInput: '',
-      spellCorrect: false,
-      quizPassed: false
+      choiceWrong: false
     })
-
-    // 埋点：开始测试
-    tracking.trackQuizStart(currentWord.word)
   },
 
   _generateChoices(currentWord, allWords) {
     const others = allWords.filter(w => w.word !== currentWord.word)
-    // Fisher-Yates shuffle and pick 3
     for (let i = others.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [others[i], others[j]] = [others[j], others[i]]
@@ -284,7 +213,6 @@ Page({
       { meaning: currentWord.meaning, correct: true },
       ...wrongItems.map(w => ({ meaning: w.meaning, correct: false }))
     ]
-    // Shuffle options
     for (let i = options.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [options[i], options[j]] = [options[j], options[i]]
@@ -292,73 +220,68 @@ Page({
     return options
   },
 
+  // ===== 选择题 =====
   onChoiceSelect(e) {
-    if (this.data.choiceSelected >= 0) return
     const index = e.currentTarget.dataset.index
     const option = this.data.choiceOptions[index]
     const correct = option.correct
 
     this.setData({
       choiceSelected: index,
-      choiceCorrect: correct
+      choiceCorrect: correct,
+      choiceWrong: !correct
     })
 
     const currentWord = this.data.words[this.data.currentIndex]
 
-    // 埋点：选择题答题
-    tracking.trackQuizChoice(currentWord.word, correct, option.meaning)
-
-    if (!correct) {
+    if (correct) {
+      // 选对了，可以进入下一步
+      tracking.trackQuizChoice(currentWord.word, true, option.meaning)
+      setTimeout(() => {
+        this.setData({ step: 3, spellInput: '', spellWrong: false })
+      }, 800)
+    } else {
+      // 选错了，停留并记录
+      tracking.trackQuizChoice(currentWord.word, false, option.meaning)
       this._saveError(currentWord, 'choice', option.meaning, currentWord.meaning)
-      // 显示鼓励语
-      this._showEncouragement()
+      // 2秒后重置，让用户重选
+      setTimeout(() => {
+        this.setData({ choiceSelected: -1, choiceWrong: false })
+      }, 1500)
     }
-
-    setTimeout(() => {
-      this.setData({ phase: 'spell' })
-    }, 1200)
-  },
-  
-  // 显示鼓励语
-  _showEncouragement() {
-    const index = Math.floor(Math.random() * this._encouragements.length)
-    const text = this._encouragements[index]
-    wx.showToast({
-      title: text,
-      icon: 'none',
-      duration: 2000
-    })
   },
 
+  // ===== 填词 =====
   onSpellInput(e) {
-    this.setData({ spellInput: e.detail.value })
+    this.setData({ spellInput: e.detail.value, spellWrong: false })
   },
 
   onSpellSubmit() {
-    const { words, currentIndex, spellInput, choiceCorrect } = this.data
+    const { words, currentIndex, spellInput } = this.data
     if (!spellInput.trim()) return
 
     const currentWord = words[currentIndex]
     const input = spellInput.trim().toLowerCase()
     const expected = currentWord.word.toLowerCase()
     const isCorrect = input === expected
-    const quizPassed = choiceCorrect && isCorrect
 
-    this.setData({
-      spellCorrect: isCorrect,
-      phase: 'result',
-      quizPassed
-    })
-
-    // 埋点：默写答题
-    tracking.trackQuizSpell(currentWord.word, isCorrect, input)
-
-    if (!isCorrect) {
-      this._saveError(currentWord, 'spell', input, expected)
-    }
-
-    if (quizPassed) {
+    if (isCorrect) {
+      // 填对了，标记掌握并进入下一词
+      tracking.trackQuizSpell(currentWord.word, true, input)
       this._doMarkMastered()
+      this._goNextWord()
+    } else {
+      // 填错了，清空重填
+      tracking.trackQuizSpell(currentWord.word, false, input)
+      this._saveError(currentWord, 'spell', input, expected)
+      this.setData({
+        spellWrong: true,
+        spellHint: `正确答案：${currentWord.word}`,
+        spellInput: ''
+      })
+      setTimeout(() => {
+        this.setData({ spellWrong: false, spellHint: '' })
+      }, 2000)
     }
   },
 
@@ -397,51 +320,85 @@ Page({
         progress: newProgress,
         todayLearned: newTodayLearned
       })
-      
-      // Save progress for interruption recovery
       this._saveProgress()
     } catch (err) {
       console.error('标记失败', err)
     }
   },
 
-  goNextAfterQuiz() {
+  // ===== 底部按钮 =====
+  onPrevWord() {
+    const { currentIndex } = this.data
+    if (currentIndex <= 0) {
+      wx.showToast({ title: '已是第一个', icon: 'none' })
+      return
+    }
+    audio.stop()
+    this.setData({
+      currentIndex: currentIndex - 1,
+      step: 1,
+      choiceSelected: -1,
+      choiceCorrect: false,
+      choiceWrong: false,
+      spellInput: '',
+      spellWrong: false
+    })
+    this._playCurrentWordAudio()
+  },
+
+  onNextWord() {
+    // 如果还在步骤1或2，提示需要完成测试
+    const { step } = this.data
+    if (step < 3) {
+      wx.showToast({ title: '请完成当前单词测试', icon: 'none' })
+      return
+    }
+    this._goNextWord()
+  },
+
+  _goNextWord() {
     const { currentIndex, words } = this.data
     if (currentIndex >= words.length - 1) {
+      // 最后一个词完成
       this.onAllDone()
     } else {
       audio.stop()
       this.setData({
         currentIndex: currentIndex + 1,
-        phase: 'learn'
+        step: 1,
+        choiceSelected: -1,
+        choiceCorrect: false,
+        choiceWrong: false,
+        spellInput: '',
+        spellWrong: false,
+        spellHint: ''
       })
+      this._playCurrentWordAudio()
     }
   },
 
-  // 连续播放模式下自动播放下一个单词
-  onSequenceComplete() {
-    if (!this.data.isContinuousMode) return
-    const { currentIndex, words } = this.data
-    if (currentIndex >= words.length - 1) {
-      // 最后一个单词，完成学习
-      this.onAllDone()
-    } else {
-      // 播放下一个单词
-      setTimeout(() => {
-        this.setData({ currentIndex: currentIndex + 1, phase: 'learn' })
-        // 自动播放下一个单词的音频
-        const wordCard = this.selectComponent('word-card')
-        if (wordCard) {
-          wordCard.playSequence()
-        }
-      }, 800)
+  // 标记为"不熟"，加入重点记忆
+  onMarkUnfamiliar() {
+    const { words, currentIndex, focusWords } = this.data
+    const currentWord = words[currentIndex]
+    if (!currentWord) return
+
+    // 检查是否已在重点记忆中
+    const exists = focusWords.includes(currentWord.word)
+    if (exists) {
+      wx.showToast({ title: '已在重点记忆中', icon: 'none' })
+      return
     }
+
+    const newFocusWords = [...focusWords, currentWord.word]
+    wx.setStorageSync('focus_words', newFocusWords)
+    this.setData({ focusWords: newFocusWords })
+    wx.showToast({ title: '已加入重点记忆', icon: 'success' })
   },
 
+  // 完成学习
   async onAllDone() {
     this.setData({ allDone: true })
-
-    // 计算学习时长
     const duration = Math.round((Date.now() - this._learnStartTime) / 1000)
 
     const { progress, unit, todayLearned } = this.data
@@ -463,10 +420,8 @@ Page({
       }
     }
 
-    // 埋点：学习完成
     tracking.trackLearnComplete(unit, todayLearned.length, duration)
 
-    // 如果有学习新词，显示庆祝动画
     if (todayLearned.length > 0) {
       this.setData({ showCelebration: true })
     } else {
